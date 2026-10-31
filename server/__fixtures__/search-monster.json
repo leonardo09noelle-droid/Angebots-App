@@ -1,0 +1,608 @@
+{
+  "filters": {
+    "retailers": [
+      {
+        "id": 126802,
+        "name": "REWE",
+        "resultsCount": 2
+      },
+      {
+        "id": 126654,
+        "name": "Kaufland",
+        "resultsCount": 1
+      },
+      {
+        "id": 126765,
+        "name": "PENNY",
+        "resultsCount": 1
+      },
+      {
+        "id": 126879,
+        "name": "toom Baumarkt",
+        "resultsCount": 1
+      },
+      {
+        "id": 137320,
+        "name": "nahkauf",
+        "resultsCount": 1
+      }
+    ],
+    "brands": [
+      {
+        "id": 118604,
+        "name": "Monster Energy",
+        "resultsCount": 3
+      },
+      {
+        "id": 109103,
+        "name": "Ferrero",
+        "resultsCount": 1
+      },
+      {
+        "id": 119171,
+        "name": "Nigrin",
+        "resultsCount": 1
+      },
+      {
+        "id": 132804,
+        "name": "Covo",
+        "resultsCount": 1
+      }
+    ],
+    "categories": [
+      {
+        "id": 359,
+        "name": "Softdrinks",
+        "resultsCount": 3
+      },
+      {
+        "id": 151,
+        "name": "Schokoladen",
+        "resultsCount": 2
+      },
+      {
+        "id": 31,
+        "name": "Auto",
+        "resultsCount": 1
+      }
+    ]
+  },
+  "totalResults": 6,
+  "skippedResults": 0,
+  "results": [
+    {
+      "brand": {
+        "uniqueName": "monster-energy",
+        "indexOffer": true,
+        "indexLeaflet": false,
+        "id": 118604,
+        "name": "Monster Energy",
+        "industryId": 1009
+      },
+      "advertisers": [
+        {
+          "uniqueName": "rewe",
+          "indexOffer": true,
+          "indexLeaflet": true,
+          "id": "retailers/126802",
+          "name": "REWE",
+          "industryId": 1009
+        }
+      ],
+      "categories": [
+        {
+          "uniqueName": null,
+          "indexOffer": false,
+          "indexLeaflet": false,
+          "id": 359,
+          "name": "Softdrinks",
+          "description": "Märkte wie beispielsweise der [toom Getränkemarkt](https://www.marktguru.de/rp/toom-getraenkemarkt-prospekte) halten eine große Auswahl an [alkoholfreien Getränken](https://www.marktguru.de/c/getraenke-alkoholfrei) bereit. Dazu zählen [Coca-Cola](https://www.marktguru.de/b/coca-cola), Säfte von [Granini](https://www.marktguru.de/b/granini) oder Energydrinks von [Red Bull](https://www.marktguru.de/b/red-bull).",
+          "parentId": 69
+        }
+      ],
+      "id": 25451637,
+      "description": "HINWEIS: MIT APP 0,10 € REWE BONUS versch. Sorten, koffeinhaltig, je 0,5-l-Dose zzgl. 0.25 Pfand",
+      "volume": 0.5,
+      "quantity": 1,
+      "isMultiProduct": true,
+      "price": 0.99,
+      "oldPrice": null,
+      "referencePrice": 1.98,
+      "requiresLoyalityMembership": false,
+      "leafletFlightId": 298627,
+      "validityDates": [
+        {
+          "from": "2026-10-25T23:00:00Z",
+          "to": "2026-10-31T22:59:00Z"
+        }
+      ],
+      "externalId": null,
+      "externalTrackingUrls": [
+        "https://servedby.flashtalking.com/imp/2/302017;10367284;201;pixel;SevenOneMediaDE;nnCPSevenOneMediaDEKaufDAMeinProspektA4CLEProspektnnAdgapId01984610141314295001/?gdpr=${GDPR}&gdpr_consent=${GDPR_CONSENT_78}&pbMethods=&cachebuster=[CACHEBUSTER]%22"
+      ],
+      "externalTrackings": [
+        {
+          "type": "click",
+          "url": "https://servedby.flashtalking.com/imp/2/302017;10367284;201;pixel;SevenOneMediaDE;nnCPSevenOneMediaDEKaufDAMeinProspektA4CLEProspektnnAdgapId01984610141314295001/?gdpr=${GDPR}&gdpr_consent=${GDPR_CONSENT_78}&pbMethods=&cachebuster=[CACHEBUSTER]%22",
+          "ugpctfet": 100
+        }
+      ],
+      "externalUrl": null,
+      "trackFlightImpression": null,
+      "type": "standard",
+      "industries": [
+        {
+          "id": 1009,
+          "name": "Supermarkt"
+        }
+      ],
+      "product": {
+        "id": 31835,
+        "name": "Energy Drink",
+        "description": null
+      },
+      "unit": {
+        "shortName": "l",
+        "id": 1,
+        "name": "Liter"
+      },
+      "images": {
+        "count": 1,
+        "isCdnSuccessfullyPurged": null,
+        "metadata": [
+          {
+            "aspectRatio": 0.6765676567656765,
+            "width": 1,
+            "height": 1.4780487804878049
+          }
+        ]
+      },
+      "imageType": "offer"
+    },
+    {
+      "brand": {
+        "uniqueName": "monster-energy",
+        "indexOffer": true,
+        "indexLeaflet": false,
+        "id": 118604,
+        "name": "Monster Energy",
+        "industryId": 1009
+      },
+      "advertisers": [
+        {
+          "uniqueName": "rewe",
+          "indexOffer": true,
+          "indexLeaflet": true,
+          "id": "retailers/126802",
+          "name": "REWE",
+          "industryId": 1009
+        }
+      ],
+      "categories": [
+        {
+          "uniqueName": null,
+          "indexOffer": false,
+          "indexLeaflet": false,
+          "id": 359,
+          "name": "Softdrinks",
+          "description": "Märkte wie beispielsweise der [toom Getränkemarkt](https://www.marktguru.de/rp/toom-getraenkemarkt-prospekte) halten eine große Auswahl an [alkoholfreien Getränken](https://www.marktguru.de/c/getraenke-alkoholfrei) bereit. Dazu zählen [Coca-Cola](https://www.marktguru.de/b/coca-cola), Säfte von [Granini](https://www.marktguru.de/b/granini) oder Energydrinks von [Red Bull](https://www.marktguru.de/b/red-bull).",
+          "parentId": 69
+        }
+      ],
+      "id": 25451632,
+      "description": "HINWEIS: MIT APP 0,10 € REWE BONUS versch. Sorten, koffeinhaltig, je 0,5-l-Dose zzgl. 0.25 Pfand",
+      "volume": 0.5,
+      "quantity": 1,
+      "isMultiProduct": true,
+      "price": 0.99,
+      "oldPrice": null,
+      "referencePrice": 1.98,
+      "requiresLoyalityMembership": false,
+      "leafletFlightId": 298627,
+      "validityDates": [
+        {
+          "from": "2026-10-25T23:00:00Z",
+          "to": "2026-10-31T22:59:00Z"
+        }
+      ],
+      "externalId": null,
+      "externalTrackingUrls": [
+        "https://servedby.flashtalking.com/imp/2/302017;10367284;201;pixel;SevenOneMediaDE;nnCPSevenOneMediaDEKaufDAMeinProspektA4CLEProspektnnAdgapId01984610141314295001/?gdpr=${GDPR}&gdpr_consent=${GDPR_CONSENT_78}&pbMethods=&cachebuster=[CACHEBUSTER]%22"
+      ],
+      "externalTrackings": [
+        {
+          "type": "click",
+          "url": "https://servedby.flashtalking.com/imp/2/302017;10367284;201;pixel;SevenOneMediaDE;nnCPSevenOneMediaDEKaufDAMeinProspektA4CLEProspektnnAdgapId01984610141314295001/?gdpr=${GDPR}&gdpr_consent=${GDPR_CONSENT_78}&pbMethods=&cachebuster=[CACHEBUSTER]%22",
+          "ugpctfet": 100
+        }
+      ],
+      "externalUrl": null,
+      "trackFlightImpression": null,
+      "type": "standard",
+      "industries": [
+        {
+          "id": 1009,
+          "name": "Supermarkt"
+        }
+      ],
+      "product": {
+        "id": 31835,
+        "name": "Energy Drink",
+        "description": null
+      },
+      "unit": {
+        "shortName": "l",
+        "id": 1,
+        "name": "Liter"
+      },
+      "images": {
+        "count": 1,
+        "isCdnSuccessfullyPurged": null,
+        "metadata": [
+          {
+            "aspectRatio": 0.6765676567656765,
+            "width": 1,
+            "height": 1.4780487804878049
+          }
+        ]
+      },
+      "imageType": "offer"
+    },
+    {
+      "brand": {
+        "uniqueName": "monster-energy",
+        "indexOffer": true,
+        "indexLeaflet": false,
+        "id": 118604,
+        "name": "Monster Energy",
+        "industryId": 1009
+      },
+      "advertisers": [
+        {
+          "uniqueName": "nahkauf",
+          "indexOffer": true,
+          "indexLeaflet": true,
+          "id": "retailers/137320",
+          "name": "nahkauf",
+          "industryId": 1009
+        }
+      ],
+      "categories": [
+        {
+          "uniqueName": null,
+          "indexOffer": false,
+          "indexLeaflet": false,
+          "id": 359,
+          "name": "Softdrinks",
+          "description": "Märkte wie beispielsweise der [toom Getränkemarkt](https://www.marktguru.de/rp/toom-getraenkemarkt-prospekte) halten eine große Auswahl an [alkoholfreien Getränken](https://www.marktguru.de/c/getraenke-alkoholfrei) bereit. Dazu zählen [Coca-Cola](https://www.marktguru.de/b/coca-cola), Säfte von [Granini](https://www.marktguru.de/b/granini) oder Energydrinks von [Red Bull](https://www.marktguru.de/b/red-bull).",
+          "parentId": 69
+        }
+      ],
+      "id": 25430392,
+      "description": "HINWEIS: MIT APP 0,10 € REWE BONUS versch. Sorten, koffeinhaltig, je 0,5-l-Dose zzgl. 0.25 Pfand",
+      "volume": 0.5,
+      "quantity": 1,
+      "isMultiProduct": true,
+      "price": 0.99,
+      "oldPrice": null,
+      "referencePrice": 1.98,
+      "requiresLoyalityMembership": false,
+      "leafletFlightId": 298557,
+      "validityDates": [
+        {
+          "from": "2026-10-25T23:00:00Z",
+          "to": "2026-10-31T22:59:00Z"
+        }
+      ],
+      "externalId": null,
+      "externalTrackingUrls": [
+        "https://servedby.flashtalking.com/imp/2/302014;10366753;201;pixel;SevenOneMediaDE;nnCPSevenOneMediaDEMarktguruA4CLEProspektnnAdgapId01984610141313447001/?gdpr=${GDPR}&gdpr_consent=${GDPR_CONSENT_78}&pbMethods=&cachebuster=[CACHEBUSTER]"
+      ],
+      "externalTrackings": [
+        {
+          "type": "click",
+          "url": "https://servedby.flashtalking.com/imp/2/302014;10366753;201;pixel;SevenOneMediaDE;nnCPSevenOneMediaDEMarktguruA4CLEProspektnnAdgapId01984610141313447001/?gdpr=${GDPR}&gdpr_consent=${GDPR_CONSENT_78}&pbMethods=&cachebuster=[CACHEBUSTER]",
+          "ugpctfet": 100
+        }
+      ],
+      "externalUrl": null,
+      "trackFlightImpression": null,
+      "type": "standard",
+      "industries": [
+        {
+          "id": 1009,
+          "name": "Supermarkt"
+        }
+      ],
+      "product": {
+        "id": 31835,
+        "name": "Energy Drink",
+        "description": null
+      },
+      "unit": {
+        "shortName": "l",
+        "id": 1,
+        "name": "Liter"
+      },
+      "images": {
+        "count": 1,
+        "isCdnSuccessfullyPurged": null,
+        "metadata": [
+          {
+            "aspectRatio": 0.5981651376146789,
+            "width": 1,
+            "height": 1.6717791411042944
+          }
+        ]
+      },
+      "imageType": "offer"
+    },
+    {
+      "brand": {
+        "uniqueName": "ferrero",
+        "indexOffer": true,
+        "indexLeaflet": false,
+        "id": 109103,
+        "name": "Ferrero",
+        "industryId": 1009
+      },
+      "advertisers": [
+        {
+          "uniqueName": "kaufland",
+          "indexOffer": true,
+          "indexLeaflet": true,
+          "id": "retailers/126654",
+          "name": "Kaufland",
+          "industryId": 1009
+        }
+      ],
+      "categories": [
+        {
+          "uniqueName": null,
+          "indexOffer": false,
+          "indexLeaflet": false,
+          "id": 151,
+          "name": "Schokoladen",
+          "description": "Schokolade gehört wohl zu den beliebtesten [Süßigkeiten](https://www.marktguru.de/c/suessigkeiten) überhaupt. Sie ist lecker und begeistert nicht nur Kinder. Produkte von Marken wie [Milka](https://www.marktguru.de/b/milka), [Mars](https://www.marktguru.de/b/mars) oder [Ritter Sport](https://www.marktguru.de/b/ritter-sport) sind sehr gefragt. Erhältlich sind sie unter anderem im [EDEKA Center](https://www.marktguru.de/rp/edeka-center-prospekte).",
+          "parentId": 20
+        }
+      ],
+      "id": 25496422,
+      "description": "mit Alkoholfüllung Kirsche in Likör und Zartbitterschokolade je 30 St. = 315-g-Packg.",
+      "volume": 0.315,
+      "quantity": 1,
+      "isMultiProduct": false,
+      "price": 4.99,
+      "oldPrice": null,
+      "referencePrice": 15.84,
+      "requiresLoyalityMembership": false,
+      "leafletFlightId": 298832,
+      "validityDates": [
+        {
+          "from": "2026-10-25T23:00:00Z",
+          "to": "2026-10-31T18:00:00Z"
+        }
+      ],
+      "externalId": null,
+      "externalTrackingUrls": [
+        "https://ad.doubleclick.net/ddm/trackimp/N1106503.2671411MARKGURUDE/B26240841.309225179;dc_pre=CIaFzIm8jI0DFZ2L_Qcd5l8Plg;dc_trk_aid=502197466;dc_trk_cid=154816736;ord={{mg-timestamp}};dc_lat=;dc_rdid=;tag_for_child_directed_treatment=;tfua=;gdpr=${GDPR};gdpr_consent=${GDPR_CONSENT_755};ltd=;dc_tdv=1"
+      ],
+      "externalTrackings": [
+        {
+          "type": "click",
+          "url": "https://ad.doubleclick.net/ddm/trackimp/N1106503.2671411MARKGURUDE/B26240841.309225179;dc_pre=CIaFzIm8jI0DFZ2L_Qcd5l8Plg;dc_trk_aid=502197466;dc_trk_cid=154816736;ord={{mg-timestamp}};dc_lat=;dc_rdid=;tag_for_child_directed_treatment=;tfua=;gdpr=${GDPR};gdpr_consent=${GDPR_CONSENT_755};ltd=;dc_tdv=1",
+          "ugpctfet": 100
+        }
+      ],
+      "externalUrl": "https://filiale.kaufland.de/angebote/uebersicht.html?kloffer-articleID=20606141",
+      "trackFlightImpression": null,
+      "type": "standard",
+      "industries": [
+        {
+          "id": 1009,
+          "name": "Supermarkt"
+        }
+      ],
+      "product": {
+        "id": 259298,
+        "name": "Mon Chéri Pralines",
+        "description": ""
+      },
+      "unit": {
+        "shortName": "kg",
+        "id": 2,
+        "name": "Kilogramm"
+      },
+      "images": {
+        "count": 1,
+        "isCdnSuccessfullyPurged": null,
+        "metadata": [
+          {
+            "aspectRatio": 1.6724738675958188,
+            "width": 1,
+            "height": 0.5979166666666667
+          }
+        ]
+      },
+      "imageType": "offer"
+    },
+    {
+      "brand": {
+        "uniqueName": "nigrin",
+        "indexOffer": true,
+        "indexLeaflet": false,
+        "id": 119171,
+        "name": "Nigrin",
+        "industryId": 1011
+      },
+      "advertisers": [
+        {
+          "uniqueName": "toom-baumarkt",
+          "indexOffer": true,
+          "indexLeaflet": true,
+          "id": "retailers/126879",
+          "name": "toom Baumarkt",
+          "industryId": 1011
+        }
+      ],
+      "categories": [
+        {
+          "uniqueName": null,
+          "indexOffer": false,
+          "indexLeaflet": false,
+          "id": 31,
+          "name": "Auto",
+          "description": "Autozubehör wie Pflegemittel von [Nigrin](https://www.marktguru.de/b/nigrin), Motoren-Öl von [Castrol](https://www.marktguru.de/b/castrol) oder Reifen von [Continental](https://www.marktguru.de/b/continental) sowie [Uniroyal](https://www.marktguru.de/b/uniroyal) gibt es unter anderem bei [A.T.U](https://www.marktguru.de/r/atu). [Diamond Car](https://www.marktguru.de/b/diamond-car) hält weitere Artikel für das Auto bereit.",
+          "parentId": 14
+        }
+      ],
+      "id": 25480907,
+      "description": "Details im Prospekt",
+      "volume": 1,
+      "quantity": 1,
+      "isMultiProduct": false,
+      "price": 9.99,
+      "oldPrice": null,
+      "referencePrice": 9.99,
+      "requiresLoyalityMembership": false,
+      "leafletFlightId": 298912,
+      "validityDates": [
+        {
+          "from": "2026-10-25T23:00:00Z",
+          "to": "2026-11-07T22:59:00Z"
+        }
+      ],
+      "externalId": null,
+      "externalTrackingUrls": [
+        "https://servedby.flashtalking.com/imp/2/302282;10382920;201;pixel;SevenOneMediaDE;nnCPSevenOneMediaDEMarktguruA4DIPnnnnAdgapId01984610141316275001/?gdpr=${GDPR}&gdpr_consent=${GDPR_CONSENT_78}&pbMethods=&cachebuster=[CACHEBUSTER]%22/"
+      ],
+      "externalTrackings": [
+        {
+          "type": "click",
+          "url": "https://servedby.flashtalking.com/imp/2/302282;10382920;201;pixel;SevenOneMediaDE;nnCPSevenOneMediaDEMarktguruA4DIPnnnnAdgapId01984610141316275001/?gdpr=${GDPR}&gdpr_consent=${GDPR_CONSENT_78}&pbMethods=&cachebuster=[CACHEBUSTER]%22/",
+          "ugpctfet": 100
+        }
+      ],
+      "externalUrl": "https://toom.de/p/felgenreiniger-alu-monster-felgenreiniger-1-l/10536643?utm_source=marktguru&utm_medium=prospektportale&utm_campaign=kw44&utm_term=prospekt",
+      "trackFlightImpression": null,
+      "type": "standard",
+      "industries": [
+        {
+          "id": 1011,
+          "name": "Baumarkt"
+        }
+      ],
+      "product": {
+        "id": 1213944,
+        "name": "Felgenreiniger Alu Monster",
+        "description": ""
+      },
+      "unit": {
+        "shortName": "l",
+        "id": 1,
+        "name": "Liter"
+      },
+      "images": {
+        "count": 1,
+        "isCdnSuccessfullyPurged": null,
+        "metadata": [
+          {
+            "aspectRatio": 1,
+            "width": 1,
+            "height": 1
+          }
+        ]
+      },
+      "imageType": "offer"
+    },
+    {
+      "brand": {
+        "uniqueName": "covo",
+        "indexOffer": false,
+        "indexLeaflet": false,
+        "id": 132804,
+        "name": "Covo",
+        "industryId": 1023
+      },
+      "advertisers": [
+        {
+          "uniqueName": "penny",
+          "indexOffer": true,
+          "indexLeaflet": true,
+          "id": "retailers/126765",
+          "name": "PENNY",
+          "industryId": 1023
+        }
+      ],
+      "categories": [
+        {
+          "uniqueName": null,
+          "indexOffer": false,
+          "indexLeaflet": false,
+          "id": 151,
+          "name": "Schokoladen",
+          "description": "Schokolade gehört wohl zu den beliebtesten [Süßigkeiten](https://www.marktguru.de/c/suessigkeiten) überhaupt. Sie ist lecker und begeistert nicht nur Kinder. Produkte von Marken wie [Milka](https://www.marktguru.de/b/milka), [Mars](https://www.marktguru.de/b/mars) oder [Ritter Sport](https://www.marktguru.de/b/ritter-sport) sind sehr gefragt. Erhältlich sind sie unter anderem im [EDEKA Center](https://www.marktguru.de/rp/edeka-center-prospekte).",
+          "parentId": 20
+        }
+      ],
+      "id": 25437517,
+      "description": "je 6 x 37,5 g",
+      "volume": 0.038,
+      "quantity": 6,
+      "isMultiProduct": false,
+      "price": 1.19,
+      "oldPrice": null,
+      "referencePrice": 5.22,
+      "requiresLoyalityMembership": false,
+      "leafletFlightId": 298532,
+      "validityDates": [
+        {
+          "from": "2026-10-25T23:00:00Z",
+          "to": "2026-10-31T22:59:00Z"
+        }
+      ],
+      "externalId": null,
+      "externalTrackingUrls": [
+        "https://servedby.flashtalking.com/imp/2/302255;10379609;201;pixel;SevenOneMediaDE;nnCPSevenOneMediaDEMarktguruA4CLEProspektnnAdgapId01984610141314757001/?gdpr=${GDPR}&gdpr_consent=${GDPR_CONSENT_78}&pbMethods=&cachebuster=[CACHEBUSTER]"
+      ],
+      "externalTrackings": [
+        {
+          "type": "click",
+          "url": "https://servedby.flashtalking.com/imp/2/302255;10379609;201;pixel;SevenOneMediaDE;nnCPSevenOneMediaDEMarktguruA4CLEProspektnnAdgapId01984610141314757001/?gdpr=${GDPR}&gdpr_consent=${GDPR_CONSENT_78}&pbMethods=&cachebuster=[CACHEBUSTER]",
+          "ugpctfet": 100
+        }
+      ],
+      "externalUrl": null,
+      "trackFlightImpression": null,
+      "type": "standard",
+      "industries": [
+        {
+          "id": 1023,
+          "name": "Discounter"
+        }
+      ],
+      "product": {
+        "id": 1101704,
+        "name": "Monster Mampf Mini",
+        "description": null
+      },
+      "unit": {
+        "shortName": "kg",
+        "id": 2,
+        "name": "Kilogramm"
+      },
+      "images": {
+        "count": 1,
+        "isCdnSuccessfullyPurged": null,
+        "metadata": [
+          {
+            "aspectRatio": 1.102177554438861,
+            "width": 1,
+            "height": 0.9072948328267477
+          }
+        ]
+      },
+      "imageType": "offer"
+    }
+  ]
+}
