@@ -1,5 +1,5 @@
-import type { Offer } from "../src/types";
-import { matchMarket } from "./retailers";
+import type { Offer } from "../src/types.js";
+import { matchMarket } from "./retailers.js";
 
 /** Die Felder einer marktguru-Suchantwort, die wir nutzen */
 export interface RawOffer {

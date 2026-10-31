@@ -1,5 +1,7 @@
-import { searchOffers } from "../server/marktguru";
-import { normalizeResults } from "../server/normalize";
+// Die Endung .js ist Pflicht: Vercel führt das als ES-Modul in Node aus,
+// und Node findet Dateien ohne Endung nicht.
+import { searchOffers } from "../server/marktguru.js";
+import { normalizeResults } from "../server/normalize.js";
 
 // GET /api/offers?zip=10115&q=Monster%20Energy,Proteinriegel
 // Läuft auf Vercel als Serverless-Funktion und lokal über die Middleware in vite.config.ts.

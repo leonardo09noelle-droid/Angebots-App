@@ -1,4 +1,4 @@
-import type { Market } from "../src/types";
+import type { Market } from "../src/types.js";
 
 // Namen bei marktguru, z. B. "REWE", "REWE Center", "ALDI SÜD", "Netto Marken-Discount".
 // Ableger wie "nahkauf" oder "Marktkauf" zählen bewusst nicht dazu.

@@ -1,4 +1,4 @@
-import type { RawOffer } from "./normalize";
+import type { RawOffer } from "./normalize.js";
 
 // marktguru hat keine offizielle Schnittstelle. Die Webseite selbst nutzt diese API
 // mit zwei Schlüsseln, die im HTML der Startseite stehen. Ändert marktguru das,
