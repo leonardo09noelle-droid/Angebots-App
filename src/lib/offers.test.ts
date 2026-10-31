@@ -3,6 +3,7 @@ import type { Offer } from "../types";
 import {
   cheapestId,
   discountPercent,
+  displayName,
   fullName,
   groupByBrand,
   groupByTerm,
@@ -153,6 +154,35 @@ describe("fullName", () => {
     expect(fullName({ brand: "Monster Energy", product: "Energy Drink" })).toBe("Monster Energy Energy Drink");
     expect(fullName({ brand: "Jameson", product: "Jameson Irish Whiskey" })).toBe("Jameson Irish Whiskey");
     expect(fullName({ product: "Proteinriegel" })).toBe("Proteinriegel");
+  });
+});
+
+describe("displayName", () => {
+  it("zeigt bei Gattungsnamen nur die Marke", () => {
+    expect(displayName(offer({ brand: "Monster Energy", product: "Energy Drink" }))).toEqual({ title: "Monster Energy" });
+  });
+
+  it("zeigt sonst Produkt groß und Marke darunter", () => {
+    expect(displayName(offer({ brand: "Ferrero", product: "Mon Chéri Pralines" }))).toEqual({
+      title: "Mon Chéri Pralines",
+      subtitle: "Ferrero",
+    });
+  });
+
+  it("wiederholt die Marke nicht, wenn sie schon im Produkt steht oder darüber", () => {
+    expect(displayName(offer({ brand: "Jameson", product: "Jameson Irish Whiskey" }))).toEqual({
+      title: "Jameson Irish Whiskey",
+    });
+    expect(displayName(offer({ brand: "Ferrero", product: "Mon Chéri Pralines" }), true)).toEqual({
+      title: "Mon Chéri Pralines",
+    });
+    expect(displayName(offer({ brand: "Monster Energy", product: "Energy Drink" }), true)).toEqual({
+      title: "Energy Drink",
+    });
+  });
+
+  it("ohne Marke einfach das Produkt", () => {
+    expect(displayName(offer({ product: "Proteinriegel" }))).toEqual({ title: "Proteinriegel" });
   });
 });
 

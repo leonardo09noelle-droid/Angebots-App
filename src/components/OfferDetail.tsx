@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import type { Offer } from "../types";
 import {
   discountPercent,
+  displayName,
   formatDate,
   formatPrice,
   isLastDay,
+  isRegionalMarket,
   isUpcoming,
   loyaltyApp,
   variety,
@@ -42,6 +44,9 @@ export function OfferDetail({ offer, cheapest, onClose, onRemove }: Props) {
   const discount = discountPercent(offer);
   const validity = validityText(offer);
   const app = loyaltyApp(offer);
+  // Groß der Anzeigename, darunter der jeweils andere Teil (z. B. "Monster Energy" / "Energy Drink")
+  const title = displayName(offer).title;
+  const subtitle = title === offer.product ? offer.brand : offer.product;
 
   // Escape schließt, dahinter scrollt nichts mit
   useEffect(() => {
@@ -61,7 +66,7 @@ export function OfferDetail({ offer, cheapest, onClose, onRemove }: Props) {
         className="sheet"
         role="dialog"
         aria-modal="true"
-        aria-label={offer.product}
+        aria-label={title}
         onClick={(e) => e.stopPropagation()}
       >
         <button className="sheet-close" onClick={onClose} aria-label="Schließen">
@@ -72,13 +77,13 @@ export function OfferDetail({ offer, cheapest, onClose, onRemove }: Props) {
           <img
             className="detail-img"
             src={images[imageIndex]}
-            alt={offer.product}
+            alt={title}
             onError={() => setImageIndex((i) => i + 1)}
           />
         )}
 
-        <h2 className="detail-product">{offer.product}</h2>
-        {offer.brand && <p className="detail-brand">{offer.brand}</p>}
+        <h2 className="detail-product">{title}</h2>
+        {subtitle && subtitle !== title && !title.includes(subtitle) && <p className="detail-brand">{subtitle}</p>}
 
         <div className="detail-price-row">
           <span className="detail-price">{formatPrice(offer.price)}</span>
@@ -143,6 +148,17 @@ export function OfferDetail({ offer, cheapest, onClose, onRemove }: Props) {
               {offer.loyalty === "required"
                 ? `Dieser Preis gilt nur mit ${app}.`
                 : `Normaler Preis für alle, über ${app} gibt's zusätzlich einen Bonus.`}
+            </p>
+          </section>
+        )}
+
+        {offer.source === "marktguru" && (
+          <section className="detail-note">
+            <h3>Gilt in welcher Filiale?</h3>
+            <p>
+              {isRegionalMarket(offer)
+                ? `Das Angebot stammt aus dem ${offer.market}-Prospekt für deine Postleitzahl. Viele ${offer.market}-Märkte gehören aber selbstständigen Kaufleuten und dürfen abweichen. Sicher ist es nur im Prospekt bzw. in der App deines Markts.`
+                : `Das Angebot stammt aus dem ${offer.market}-Prospekt für deine Postleitzahl und gilt normalerweise in allen Filialen der Gegend, solange der Vorrat reicht.`}
             </p>
           </section>
         )}

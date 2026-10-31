@@ -2,6 +2,7 @@ import { useState, type KeyboardEvent, type MouseEvent } from "react";
 import type { Offer } from "../types";
 import {
   discountPercent,
+  displayName,
   formatDate,
   formatPrice,
   isLastDay,
@@ -29,6 +30,7 @@ export function OfferCard({ offer, cheapest, isNew, hideBrand, onOpen }: Props) 
   const lastDay = isLastDay(offer);
   const loyalty = loyaltyLabel(offer);
   const mixed = variety(offer) === "mixed";
+  const name = displayName(offer, hideBrand);
 
   function onShareClick(e: MouseEvent) {
     e.stopPropagation(); // nicht gleichzeitig die Details öffnen
@@ -59,8 +61,8 @@ export function OfferCard({ offer, cheapest, isNew, hideBrand, onOpen }: Props) 
       )}
 
       <div className="offer-main">
-        <div className="offer-product">{offer.product}</div>
-        {offer.brand && !hideBrand && <div className="offer-brand">{offer.brand}</div>}
+        <div className="offer-product">{name.title}</div>
+        {name.subtitle && <div className="offer-brand">{name.subtitle}</div>}
         <div className="offer-meta">
           <span className="offer-market">{offer.market}</span>
           {cheapest && <span className="best">Günstigster</span>}

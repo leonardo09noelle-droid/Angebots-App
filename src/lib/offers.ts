@@ -20,6 +20,33 @@ export function fullName(offer: Pick<Offer, "brand" | "product">): string {
   return `${brand} ${product}`;
 }
 
+function significantWords(text: string): string[] {
+  return text
+    .toLowerCase()
+    .split(/[^a-zäöüß0-9]+/)
+    .filter((w) => w.length >= 4);
+}
+
+/**
+ * Was groß auf der Karte steht. Ist der Produktname nur eine Gattung zur Marke
+ * ("Energy Drink" bei "Monster Energy"), zählt die Marke. Sonst das Produkt mit Marke darunter.
+ * hideBrand: Die Marke steht schon als Zwischenüberschrift darüber.
+ */
+export function displayName(offer: Offer, hideBrand = false): { title: string; subtitle?: string } {
+  const { brand, product } = offer;
+  if (!brand || product.toLowerCase().includes(brand.toLowerCase())) return { title: product };
+
+  const brandWords = new Set(significantWords(brand));
+  const generic = significantWords(product).some((w) => brandWords.has(w));
+  if (generic) return hideBrand ? { title: product } : { title: brand };
+  return hideBrand ? { title: product } : { title: product, subtitle: brand };
+}
+
+/** REWE und EDEKA: viele Filialen gehören selbstständigen Kaufleuten, Angebote können abweichen */
+export function isRegionalMarket(offer: Offer): boolean {
+  return offer.market === "Rewe" || offer.market === "Edeka";
+}
+
 /** "versch. Sorten" im Prospekt: mehrere Sorten, aber nicht unbedingt alle */
 export function variety(offer: Offer): "mixed" | undefined {
   return offer.details && /versch(\.|iedene)\s*sorten/i.test(offer.details) ? "mixed" : undefined;

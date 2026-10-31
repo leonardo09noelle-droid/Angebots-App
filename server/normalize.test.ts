@@ -29,6 +29,17 @@ describe("normalizeResults", () => {
     });
   });
 
+  it("fasst dasselbe Angebot aus Regional-Prospekten mit anderem Kleingedruckten zusammen", () => {
+    const rewe = results.filter((r) => r.advertisers?.[0]?.name === "REWE");
+    const variants = [{ ...rewe[0], description: "versch. Sorten, je 0,5-l-Dose" }, rewe[1]];
+    const offers = normalizeResults(variants, "Monster Energy");
+    expect(offers).toHaveLength(1);
+    // die ausführlichere Beschreibung samt App-Bonus bleibt erhalten
+    expect(offers[0].details).toContain("REWE BONUS");
+    expect(offers[0].loyalty).toBe("bonus");
+    expect(offers[0].deposit).toBe(0.25);
+  });
+
   it("übernimmt den Link zum Markt, falls vorhanden", () => {
     const [offer] = normalizeResults(results, "Mon Chéri");
     expect(offer).toMatchObject({ market: "Kaufland", product: "Mon Chéri Pralines", brand: "Ferrero" });

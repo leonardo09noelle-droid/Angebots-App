@@ -103,17 +103,26 @@ export function normalizeOffer(raw: RawOffer, term: string): Offer | undefined {
   };
 }
 
-/** Wandelt alle Treffer um und entfernt Dubletten (gleiches Angebot aus mehreren Regional-Prospekten) */
+/**
+ * Wandelt alle Treffer um und fasst Dubletten zusammen: Dasselbe Angebot steht oft in
+ * mehreren Regional-Prospekten, teils mit leicht anderem Kleingedrucktem. Gleich sind
+ * Markt, Produkt, Preis und Gültigkeit; behalten werden die ausführlichsten Angaben.
+ */
 export function normalizeResults(results: RawOffer[], term: string): Offer[] {
-  const seen = new Set<string>();
-  const offers: Offer[] = [];
+  const byKey = new Map<string, Offer>();
   for (const raw of results) {
     const offer = normalizeOffer(raw, term);
     if (!offer) continue;
-    const key = [offer.market, fullName(offer), offer.price, offer.validUntil, offer.details].join("|");
-    if (seen.has(key)) continue;
-    seen.add(key);
-    offers.push(offer);
+    const key = [offer.market, fullName(offer).toLowerCase(), offer.price, offer.validUntil].join("|");
+    const existing = byKey.get(key);
+    if (!existing) {
+      byKey.set(key, offer);
+      continue;
+    }
+    if ((offer.details?.length ?? 0) > (existing.details?.length ?? 0)) existing.details = offer.details;
+    existing.loyalty ??= offer.loyalty;
+    existing.deposit ??= offer.deposit;
+    existing.externalUrl ??= offer.externalUrl;
   }
-  return offers;
+  return [...byKey.values()];
 }
