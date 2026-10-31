@@ -1,8 +1,16 @@
-import type { Offer } from "../types";
+import type { Market, Offer } from "../types";
 
 export interface OfferGroup {
   term: string;
   offers: Offer[];
+}
+
+export interface BrandGroup {
+  key: string;
+  brand: string;
+  offers: Offer[];
+  /** Angebot mit dem Abzeichen "Günstigster", falls es einen klaren Sieger gibt */
+  cheapestId?: string;
 }
 
 /** Heutiges Datum als YYYY-MM-DD in lokaler Zeit */
@@ -20,6 +28,75 @@ export function isActive(offer: Offer, today = todayISO()): boolean {
 /** Gilt erst ab einem späteren Tag (z. B. Prospekt der nächsten Woche) */
 export function isUpcoming(offer: Offer, today = todayISO()): boolean {
   return !!offer.validFrom && offer.validFrom > today;
+}
+
+/** Heute ist der letzte Tag des Angebots */
+export function isLastDay(offer: Offer, today = todayISO()): boolean {
+  return offer.validUntil === today;
+}
+
+/**
+ * Günstigstes Angebot innerhalb EINER Marke. Nur wenn die Marke heute in mindestens
+ * zwei Märkten im Angebot ist und ein Angebot klar vorne liegt (kein Gleichstand).
+ * Haben alle einen Grundpreis in derselben Einheit, zählt der (Dose vs. 12er-Pack).
+ */
+export function cheapestId(offers: Offer[], today = todayISO()): string | undefined {
+  const current = offers.filter((o) => !isUpcoming(o, today));
+  if (new Set(current.map((o) => o.market)).size < 2) return undefined;
+
+  const unit = current[0].referenceUnit;
+  const byUnit = !!unit && current.every((o) => o.referencePrice !== undefined && o.referenceUnit === unit);
+  const value = (o: Offer) => (byUnit ? o.referencePrice! : o.price);
+  const sorted = [...current].sort((a, b) => value(a) - value(b));
+  return value(sorted[0]) < value(sorted[1]) ? sorted[0].id : undefined;
+}
+
+function brandKey(offer: Offer): string {
+  return (offer.brand ?? offer.product).trim().toLowerCase();
+}
+
+/**
+ * Teilt die (schon sortierten) Angebote eines Merklisten-Eintrags nach Marke auf.
+ * Ohne Marke zählt der Produktname. Die Marke mit dem besten Angebot steht oben.
+ */
+export function groupByBrand(offers: Offer[], today = todayISO()): BrandGroup[] {
+  const byKey = new Map<string, Offer[]>();
+  for (const offer of offers) {
+    const key = brandKey(offer);
+    byKey.set(key, [...(byKey.get(key) ?? []), offer]);
+  }
+  return [...byKey.entries()]
+    .map(([key, list]) => ({
+      key,
+      brand: list[0].brand ?? list[0].product,
+      offers: list,
+      cheapestId: cheapestId(list, today),
+    }))
+    .sort((a, b) => offers.indexOf(a.offers[0]) - offers.indexOf(b.offers[0]));
+}
+
+/** Neu ist, was beim letzten Mal noch nicht da war. Beim allerersten Start (seen = null) ist nichts neu. */
+export function markNew(currentIds: string[], seenIds: string[] | null): Set<string> {
+  if (!seenIds) return new Set();
+  const seen = new Set(seenIds);
+  return new Set(currentIds.filter((id) => !seen.has(id)));
+}
+
+const LOYALTY_APP: Record<Market, string> = {
+  Lidl: "Lidl Plus",
+  "Aldi Nord": "ALDI-App",
+  "Aldi Süd": "ALDI-App",
+  Penny: "PENNY-App",
+  Netto: "Netto-App",
+  Rewe: "REWE-App",
+  Edeka: "EDEKA-App",
+  Kaufland: "Kaufland Card",
+};
+
+export function loyaltyLabel(offer: Offer): string | undefined {
+  if (offer.loyalty === "required") return `Nur mit ${LOYALTY_APP[offer.market]}`;
+  if (offer.loyalty === "bonus") return `+ Bonus mit ${LOYALTY_APP[offer.market]}`;
+  return undefined;
 }
 
 export function discountPercent(offer: Offer): number | undefined {

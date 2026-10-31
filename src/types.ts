@@ -16,6 +16,8 @@ export interface Offer {
   /** Merklisten-Eintrag, zu dem das Angebot gehört (z. B. "Monster Energy") */
   term: string;
   product: string;
+  /** Nur Angebote derselben Marke werden miteinander verglichen */
+  brand?: string;
   price: number;
   oldPrice?: number;
   market: Market;
@@ -29,5 +31,7 @@ export interface Offer {
   referencePrice?: number;
   referenceUnit?: string;
   imageUrl?: string;
+  /** Preis gilt nur mit Kunden-App/-Karte ("required") oder es gibt dort extra Bonus ("bonus") */
+  loyalty?: "required" | "bonus";
   source: "manual" | "marktguru";
 }

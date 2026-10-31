@@ -1,26 +1,32 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Offer } from "./types";
-import { groupByTerm, isUpcoming } from "./lib/offers";
+import { groupByTerm, markNew } from "./lib/offers";
 import { fetchOffers } from "./lib/api";
 import {
+  loadMarkets,
   loadOffers,
   loadRemote,
+  loadSeen,
   loadWatchlist,
   loadZip,
+  saveMarkets,
   saveOffers,
   saveRemote,
+  saveSeen,
   saveWatchlist,
   saveZip,
   type RemoteCache,
 } from "./lib/storage";
-import { OfferCard } from "./components/OfferCard";
+import { OfferList } from "./components/OfferList";
 import { AddOffer } from "./components/AddOffer";
+import { Search } from "./components/Search";
 import { Settings } from "./components/Settings";
 
-type Tab = "offers" | "add" | "settings";
+type Tab = "offers" | "search" | "add" | "settings";
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: "offers", label: "Angebote", icon: "🏷️" },
+  { id: "search", label: "Suchen", icon: "🔍" },
   { id: "add", label: "Eintragen", icon: "➕" },
   { id: "settings", label: "Einstellungen", icon: "⚙️" },
 ];
@@ -31,14 +37,17 @@ export default function App() {
   const [tab, setTab] = useState<Tab>("offers");
   const [watchlist, setWatchlist] = useState(loadWatchlist);
   const [zip, setZip] = useState(loadZip);
+  const [markets, setMarkets] = useState(loadMarkets);
   const [offers, setOffers] = useState(loadOffers);
   const [remote, setRemote] = useState<RemoteCache | null>(loadRemote);
+  const [newIds, setNewIds] = useState<Set<string>>(() => new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [reloadToken, setReloadToken] = useState(0);
 
   useEffect(() => saveWatchlist(watchlist), [watchlist]);
   useEffect(() => saveZip(zip), [zip]);
+  useEffect(() => saveMarkets(markets), [markets]);
   useEffect(() => saveOffers(offers), [offers]);
 
   const validZip = /^\d{5}$/.test(zip);
@@ -55,6 +64,14 @@ export default function App() {
         const cache = { zip, fetchedAt: Date.now(), offers: result.offers };
         setRemote(cache);
         saveRemote(cache);
+
+        // "Neu" bleibt für diese Sitzung stehen, auch nach erneutem Aktualisieren
+        const ids = result.offers.map((o) => o.id);
+        const seen = loadSeen();
+        const fresh = markNew(ids, seen);
+        setNewIds((prev) => new Set([...prev, ...fresh]));
+        saveSeen([...new Set([...ids, ...(seen ?? [])])]);
+
         if (result.failedTerms.length) setError(`Für ${result.failedTerms.join(", ")} hat die Suche nicht geklappt.`);
       })
       .catch((err: Error) => {
@@ -70,7 +87,8 @@ export default function App() {
     () => (remote && remote.zip === zip ? [...offers, ...remote.offers] : offers),
     [offers, remote, zip],
   );
-  const groups = useMemo(() => groupByTerm(allOffers, watchlist), [allOffers, watchlist]);
+  const visibleOffers = useMemo(() => allOffers.filter((o) => markets.includes(o.market)), [allOffers, markets]);
+  const groups = useMemo(() => groupByTerm(visibleOffers, watchlist), [visibleOffers, watchlist]);
 
   function addOffer(offer: Offer) {
     setOffers((prev) => [...prev, offer]);
@@ -79,6 +97,10 @@ export default function App() {
 
   function removeOffer(id: string) {
     setOffers((prev) => prev.filter((o) => o.id !== id));
+  }
+
+  function addTerm(term: string) {
+    setWatchlist((prev) => (prev.some((w) => w.toLowerCase() === term.toLowerCase()) ? prev : [...prev, term]));
   }
 
   return (
@@ -116,6 +138,12 @@ export default function App() {
               </p>
             )}
 
+            {markets.length === 0 && (
+              <p className="notice">
+                Du hast unter <b>Einstellungen</b> alle Märkte abgewählt, deshalb siehst du keine Angebote.
+              </p>
+            )}
+
             {watchlist.length === 0 ? (
               <p className="empty">
                 Deine Merkliste ist leer. Füg unter <b>Einstellungen</b> Produkte hinzu.
@@ -130,16 +158,7 @@ export default function App() {
                   {group.offers.length === 0 ? (
                     <p className="none">{loading ? "…" : "Gerade kein Angebot bekannt."}</p>
                   ) : (
-                    <ul className="offer-list">
-                      {group.offers.map((offer, i) => (
-                        <OfferCard
-                          key={offer.id}
-                          offer={offer}
-                          cheapest={i === 0 && group.offers.length > 1 && !isUpcoming(offer)}
-                          onRemove={removeOffer}
-                        />
-                      ))}
-                    </ul>
+                    <OfferList offers={group.offers} newIds={newIds} onRemove={removeOffer} />
                   )}
                 </section>
               ))
@@ -147,10 +166,19 @@ export default function App() {
           </>
         )}
 
+        {tab === "search" && <Search zip={zip} markets={markets} watchlist={watchlist} onAddTerm={addTerm} />}
+
         {tab === "add" && <AddOffer watchlist={watchlist} onAdd={addOffer} />}
 
         {tab === "settings" && (
-          <Settings watchlist={watchlist} onWatchlistChange={setWatchlist} zip={zip} onZipChange={setZip} />
+          <Settings
+            watchlist={watchlist}
+            onWatchlistChange={setWatchlist}
+            zip={zip}
+            onZipChange={setZip}
+            markets={markets}
+            onMarketsChange={setMarkets}
+          />
         )}
       </main>
 

@@ -13,6 +13,7 @@ describe("normalizeResults", () => {
     expect(offers[0]).toMatchObject({
       term: "Monster Energy",
       product: "Monster Energy Energy Drink",
+      brand: "Monster Energy",
       market: "Rewe",
       price: 0.99,
       oldPrice: undefined,
@@ -20,8 +21,17 @@ describe("normalizeResults", () => {
       validUntil: "2026-10-31",
       referencePrice: 1.98,
       referenceUnit: "l",
+      loyalty: "bonus",
       source: "marktguru",
     });
+  });
+
+  it("erkennt Kundenkarten-Pflicht und lässt normale Angebote ohne Hinweis", () => {
+    const base = results.find((r) => r.product?.name === "Monster Mampf Mini")!;
+    expect(normalizeResults([base], "Monster")[0].loyalty).toBeUndefined();
+    expect(normalizeResults([{ ...base, requiresLoyalityMembership: true }], "Monster")[0].loyalty).toBe("required");
+    expect(normalizeResults([{ ...base, description: "nur mit Lidl Plus" }], "Monster")[0].loyalty).toBe("required");
+    expect(normalizeResults([{ ...base, description: "10-fach PAYBACK Punkte" }], "Monster")[0].loyalty).toBe("bonus");
   });
 
   it("blendet Märkte außerhalb der Auswahl aus (nahkauf, toom)", () => {

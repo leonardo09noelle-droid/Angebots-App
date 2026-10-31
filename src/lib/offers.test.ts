@@ -1,6 +1,16 @@
 import { describe, expect, it } from "vitest";
 import type { Offer } from "../types";
-import { discountPercent, groupByTerm, isActive, todayISO } from "./offers";
+import {
+  cheapestId,
+  discountPercent,
+  groupByBrand,
+  groupByTerm,
+  isActive,
+  isLastDay,
+  loyaltyLabel,
+  markNew,
+  todayISO,
+} from "./offers";
 
 const offer = (o: Partial<Offer>): Offer => ({
   id: "x",
@@ -64,5 +74,82 @@ describe("groupByTerm", () => {
       today,
     );
     expect(groups[0].offers.map((o) => o.id)).toEqual(["now", "next"]);
+  });
+});
+
+describe("cheapestId", () => {
+  const today = "2026-10-31";
+
+  it("kürt den billigsten Markt derselben Marke", () => {
+    const offers = [offer({ id: "lidl", price: 15.99 }), offer({ id: "rewe", price: 17.49, market: "Rewe" })];
+    expect(cheapestId(offers, today)).toBe("lidl");
+  });
+
+  it("kein Abzeichen, wenn es die Marke nur in einem Markt gibt", () => {
+    expect(cheapestId([offer({ id: "a", price: 1 }), offer({ id: "b", price: 2 })], today)).toBeUndefined();
+  });
+
+  it("kein Abzeichen bei Gleichstand", () => {
+    const offers = [offer({ id: "a", price: 0.99 }), offer({ id: "b", price: 0.99, market: "Rewe" })];
+    expect(cheapestId(offers, today)).toBeUndefined();
+  });
+
+  it("vergleicht über den Grundpreis, wenn alle einen haben", () => {
+    const offers = [
+      offer({ id: "dose", price: 0.99, referencePrice: 1.98, referenceUnit: "l" }),
+      offer({ id: "pack", price: 9.99, referencePrice: 1.67, referenceUnit: "l", market: "Kaufland" }),
+    ];
+    expect(cheapestId(offers, today)).toBe("pack");
+  });
+
+  it("ignoriert Angebote, die erst später gelten", () => {
+    const offers = [
+      offer({ id: "next", price: 0.79, validFrom: "2026-11-02", market: "Penny" }),
+      offer({ id: "now", price: 0.99 }),
+    ];
+    expect(cheapestId(offers, today)).toBeUndefined();
+  });
+});
+
+describe("groupByBrand", () => {
+  it("trennt Marken und vergibt das Abzeichen nur innerhalb einer Marke", () => {
+    const offers = [
+      offer({ id: "jameson", brand: "Jameson", product: "Jameson Irish Whiskey", price: 13.99, market: "Penny" }),
+      offer({ id: "jd-lidl", brand: "Jack Daniel's", product: "Jack Daniel's No. 7", price: 15.99 }),
+      offer({ id: "jd-rewe", brand: "JACK DANIEL'S ", product: "Jack Daniel's No. 7", price: 17.49, market: "Rewe" }),
+    ];
+    const groups = groupByBrand(offers, "2026-10-31");
+    expect(groups.map((g) => g.brand)).toEqual(["Jameson", "Jack Daniel's"]);
+    expect(groups.map((g) => g.cheapestId)).toEqual([undefined, "jd-lidl"]);
+  });
+
+  it("gruppiert ohne Marke nach Produktname", () => {
+    const groups = groupByBrand([offer({ id: "a", product: "Proteinriegel" }), offer({ id: "b", product: "proteinriegel" })]);
+    expect(groups).toHaveLength(1);
+  });
+});
+
+describe("isLastDay", () => {
+  it("nur am letzten Gültigkeitstag", () => {
+    expect(isLastDay(offer({ validUntil: "2026-10-31" }), "2026-10-31")).toBe(true);
+    expect(isLastDay(offer({ validUntil: "2026-11-01" }), "2026-10-31")).toBe(false);
+    expect(isLastDay(offer({}), "2026-10-31")).toBe(false);
+  });
+});
+
+describe("markNew", () => {
+  it("beim ersten Start ist nichts neu", () => {
+    expect(markNew(["a", "b"], null).size).toBe(0);
+  });
+  it("neu ist, was vorher nicht gesehen wurde", () => {
+    expect([...markNew(["a", "b", "c"], ["a"])]).toEqual(["b", "c"]);
+  });
+});
+
+describe("loyaltyLabel", () => {
+  it("nennt die App des Markts", () => {
+    expect(loyaltyLabel(offer({ loyalty: "required", market: "Lidl" }))).toBe("Nur mit Lidl Plus");
+    expect(loyaltyLabel(offer({ loyalty: "bonus", market: "Rewe" }))).toBe("+ Bonus mit REWE-App");
+    expect(loyaltyLabel(offer({}))).toBeUndefined();
   });
 });

@@ -1,13 +1,16 @@
 import { useState, type FormEvent } from "react";
+import { MARKETS, type Market } from "../types";
 
 interface Props {
   watchlist: string[];
   onWatchlistChange: (list: string[]) => void;
   zip: string;
   onZipChange: (zip: string) => void;
+  markets: Market[];
+  onMarketsChange: (markets: Market[]) => void;
 }
 
-export function Settings({ watchlist, onWatchlistChange, zip, onZipChange }: Props) {
+export function Settings({ watchlist, onWatchlistChange, zip, onZipChange, markets, onMarketsChange }: Props) {
   const [newTerm, setNewTerm] = useState("");
 
   function addTerm(e: FormEvent) {
@@ -19,6 +22,12 @@ export function Settings({ watchlist, onWatchlistChange, zip, onZipChange }: Pro
       onWatchlistChange([...watchlist, term]);
     }
     setNewTerm("");
+  }
+
+  function toggleMarket(market: Market) {
+    // Reihenfolge wie in MARKETS behalten
+    const next = markets.includes(market) ? markets.filter((m) => m !== market) : [...markets, market];
+    onMarketsChange(MARKETS.filter((m) => next.includes(m)));
   }
 
   return (
@@ -46,6 +55,19 @@ export function Settings({ watchlist, onWatchlistChange, zip, onZipChange }: Pro
             Hinzufügen
           </button>
         </form>
+      </section>
+
+      <section className="card">
+        <h2>Meine Märkte</h2>
+        <p className="hint">Nur Angebote aus angehakten Märkten werden angezeigt.</p>
+        <div className="market-grid">
+          {MARKETS.map((m) => (
+            <label key={m} className={`market-check${markets.includes(m) ? " on" : ""}`}>
+              <input type="checkbox" checked={markets.includes(m)} onChange={() => toggleMarket(m)} />
+              {m}
+            </label>
+          ))}
+        </div>
       </section>
 
       <section className="card">

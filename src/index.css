@@ -224,13 +224,121 @@ select:focus {
   overflow: hidden;
 }
 
-.soon {
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.badge {
   font-size: 11px;
   font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.badge-new {
+  color: var(--accent-text);
+  background: var(--accent);
+}
+
+.badge-last {
+  color: #fff;
+  background: var(--danger);
+}
+
+.badge-soon {
   color: var(--accent);
   border: 1px solid var(--accent);
-  padding: 0 6px;
-  border-radius: 6px;
+}
+
+.badge-app {
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  font-weight: 600;
+}
+
+.brand-groups {
+  display: grid;
+  gap: 12px;
+}
+
+.brand-heading {
+  margin: 0 0 6px 2px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.share {
+  margin-top: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.market-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.market-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.market-check.on {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.market-check input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--accent);
+}
+
+.add-watch {
+  margin-left: auto;
+  border: 1px solid var(--accent);
+  background: none;
+  color: var(--accent);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.add-watch:disabled {
+  border-color: var(--border);
+  color: var(--muted);
+}
+
+.search .add-term {
+  margin-bottom: 16px;
 }
 
 .offer-card.upcoming {
@@ -440,7 +548,7 @@ select:focus {
   right: 0;
   bottom: 0;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   padding: 6px 8px calc(env(safe-area-inset-bottom) + 6px);
   background: color-mix(in srgb, var(--surface) 92%, transparent);
   backdrop-filter: blur(12px);

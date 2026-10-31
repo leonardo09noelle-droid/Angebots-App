@@ -9,6 +9,7 @@ export interface RawOffer {
   description?: string | null;
   price?: number | null;
   oldPrice?: number | null;
+  requiresLoyalityMembership?: boolean | null;
   referencePrice?: number | null;
   unit?: { shortName?: string } | null;
   advertisers?: { name?: string }[] | null;
@@ -56,6 +57,17 @@ function productName(raw: RawOffer): string {
   return `${brand} ${product}`;
 }
 
+// Preis gilt nur mit App/Karte, z. B. "nur mit Lidl Plus", "App-Preis"
+const LOYALTY_REQUIRED = /nur\s+mit\s+(der\s+)?(app|karte|card)|lidl\s*plus|app-preis/i;
+// Normaler Preis plus Extra-Vorteil, z. B. "MIT APP 0,10 € REWE BONUS", "PAYBACK", "Kaufland Card"
+const LOYALTY_BONUS = /\bmit\s+(der\s+)?app\b|\bbonus\b|payback|kaufland\s*card|deutschlandcard/i;
+
+function loyaltyOf(raw: RawOffer): Offer["loyalty"] {
+  const text = raw.description ?? "";
+  if (raw.requiresLoyalityMembership || LOYALTY_REQUIRED.test(text)) return "required";
+  return LOYALTY_BONUS.test(text) ? "bonus" : undefined;
+}
+
 export function normalizeOffer(raw: RawOffer, term: string): Offer | undefined {
   const market = (raw.advertisers ?? []).map((a) => matchMarket(a.name ?? "")).find(Boolean);
   if (!market || typeof raw.price !== "number" || !matchesTerm(raw, term)) return undefined;
@@ -65,6 +77,7 @@ export function normalizeOffer(raw: RawOffer, term: string): Offer | undefined {
     id: `mg-${raw.id}`,
     term,
     product: productName(raw),
+    brand: raw.brand?.name?.trim() || undefined,
     price: raw.price,
     oldPrice: raw.oldPrice ?? undefined,
     market,
@@ -74,6 +87,7 @@ export function normalizeOffer(raw: RawOffer, term: string): Offer | undefined {
     referencePrice: raw.referencePrice ?? undefined,
     referenceUnit: raw.unit?.shortName ?? undefined,
     imageUrl: `https://mg2de.b-cdn.net/api/v1/offers/${raw.id}/images/default/0/small.jpg`,
+    loyalty: loyaltyOf(raw),
     source: "marktguru",
   };
 }

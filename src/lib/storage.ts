@@ -1,4 +1,4 @@
-import type { Offer } from "../types";
+import { MARKETS, type Market, type Offer } from "../types";
 
 // Alles liegt nur auf diesem Handy (localStorage). Lesen/Schreiben kann z. B. im
 // privaten Modus fehlschlagen, deshalb fällt alles auf die Startwerte zurück.
@@ -8,7 +8,11 @@ const KEYS = {
   zip: "angebote.zip",
   offers: "angebote.offers",
   remote: "angebote.remote",
+  markets: "angebote.markets",
+  seen: "angebote.seen",
 };
+
+const MAX_SEEN = 2000;
 
 /** Letztes Ergebnis der automatischen Suche, damit die App auch offline etwas zeigt */
 export interface RemoteCache {
@@ -47,3 +51,12 @@ export const saveOffers = (offers: Offer[]) => write(KEYS.offers, offers);
 
 export const loadRemote = () => read<RemoteCache | null>(KEYS.remote, null);
 export const saveRemote = (cache: RemoteCache) => write(KEYS.remote, cache);
+
+/** Angehakte Lieblingsmärkte, Standard: alle */
+export const loadMarkets = (): Market[] =>
+  read<string[]>(KEYS.markets, [...MARKETS]).filter((m): m is Market => (MARKETS as readonly string[]).includes(m));
+export const saveMarkets = (markets: Market[]) => write(KEYS.markets, markets);
+
+/** IDs schon gesehener Angebote für das "Neu"-Abzeichen; null = App wurde noch nie geladen */
+export const loadSeen = () => read<string[] | null>(KEYS.seen, null);
+export const saveSeen = (ids: string[]) => write(KEYS.seen, ids.slice(0, MAX_SEEN));

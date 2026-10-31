@@ -11,5 +11,7 @@ export async function fetchOffers(zip: string, terms: string[], signal?: AbortSi
   const res = await fetch(`/api/offers?${params}`, { signal });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(body.error ?? `Fehler ${res.status}`);
-  return { offers: body.offers ?? [], failedTerms: body.failedTerms ?? [] };
+  // Z. B. eine HTML-Seite statt JSON: nicht als "keine Angebote" werten
+  if (!Array.isArray(body.offers)) throw new Error("Unerwartete Antwort vom Server.");
+  return { offers: body.offers, failedTerms: body.failedTerms ?? [] };
 }

@@ -15,6 +15,7 @@ function parsePrice(value: string): number | undefined {
 export function AddOffer({ watchlist, onAdd }: Props) {
   const [term, setTerm] = useState(watchlist[0] ?? "");
   const [product, setProduct] = useState("");
+  const [brand, setBrand] = useState("");
   const [market, setMarket] = useState<Market>(MARKETS[0]);
   const [price, setPrice] = useState("");
   const [oldPrice, setOldPrice] = useState("");
@@ -40,6 +41,7 @@ export function AddOffer({ watchlist, onAdd }: Props) {
       id: crypto.randomUUID(),
       term,
       product: product.trim() || term,
+      brand: brand.trim() || undefined,
       market,
       price: p,
       oldPrice: parsePrice(oldPrice),
@@ -68,6 +70,11 @@ export function AddOffer({ watchlist, onAdd }: Props) {
           onChange={(e) => setProduct(e.target.value)}
           placeholder="z. B. Monster Ultra White 0,5 l"
         />
+      </label>
+
+      <label>
+        Marke <span className="optional">(optional, zum Preisvergleich)</span>
+        <input value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="z. B. Jack Daniel's" />
       </label>
 
       <label>
