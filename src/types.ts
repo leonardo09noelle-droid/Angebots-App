@@ -15,6 +15,7 @@ export interface Offer {
   id: string;
   /** Merklisten-Eintrag, zu dem das Angebot gehört (z. B. "Monster Energy") */
   term: string;
+  /** Produktname ohne Marke, z. B. "Energy Drink" (vollständig: fullName()) */
   product: string;
   /** Nur Angebote derselben Marke werden miteinander verglichen */
   brand?: string;
@@ -30,6 +31,12 @@ export interface Offer {
   /** Grundpreis, z. B. 1.98 mit referenceUnit "l" = 1,98 €/l */
   referencePrice?: number;
   referenceUnit?: string;
+  /** Pfand pro Stück in €, z. B. 0.25 */
+  deposit?: number;
+  /** z. B. "Softdrinks" */
+  category?: string;
+  /** Angebotsseite des Markts, falls marktguru sie kennt */
+  externalUrl?: string;
   imageUrl?: string;
   /** Preis gilt nur mit Kunden-App/-Karte ("required") oder es gibt dort extra Bonus ("bonus") */
   loyalty?: "required" | "bonus";

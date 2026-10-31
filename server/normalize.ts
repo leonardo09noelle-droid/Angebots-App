@@ -1,4 +1,5 @@
 import type { Offer } from "../src/types.js";
+import { fullName } from "../src/lib/offers.js";
 import { matchMarket } from "./retailers.js";
 
 /** Die Felder einer marktguru-Suchantwort, die wir nutzen */
@@ -15,6 +16,7 @@ export interface RawOffer {
   advertisers?: { name?: string }[] | null;
   categories?: { name?: string }[] | null;
   validityDates?: { from?: string; to?: string }[] | null;
+  externalUrl?: string | null;
 }
 
 const berlinDate = new Intl.DateTimeFormat("sv-SE", {
@@ -49,12 +51,18 @@ export function matchesTerm(raw: RawOffer, term: string): boolean {
     .every((word) => text.includes(word) || compact.includes(word));
 }
 
-function productName(raw: RawOffer): string {
-  const brand = raw.brand?.name?.trim() ?? "";
-  const product = raw.product?.name?.trim() ?? "";
-  if (!brand) return product;
-  if (!product || product.toLowerCase().includes(brand.toLowerCase())) return product || brand;
-  return `${brand} ${product}`;
+/** "zzgl. 0.25 Pfand", "zzgl. 0,25 € Pfand", "Pfand 0,25" -> 0.25 */
+function depositOf(description: string | null | undefined): number | undefined {
+  const match =
+    description?.match(/zzgl\.?\s*(?:€\s*)?(\d+[.,]\d{1,2})\s*(?:€\s*)?pfand/i) ??
+    description?.match(/pfand\s*:?\s*(\d+[.,]\d{1,2})/i);
+  const value = match ? Number(match[1].replace(",", ".")) : NaN;
+  return value > 0 && value < 10 ? value : undefined;
+}
+
+/** Nur echte Web-Links übernehmen */
+function safeUrl(url: string | null | undefined): string | undefined {
+  return url && /^https:\/\//i.test(url) ? url : undefined;
 }
 
 // Preis gilt nur mit App/Karte, z. B. "nur mit Lidl Plus", "App-Preis"
@@ -76,7 +84,7 @@ export function normalizeOffer(raw: RawOffer, term: string): Offer | undefined {
   return {
     id: `mg-${raw.id}`,
     term,
-    product: productName(raw),
+    product: raw.product?.name?.trim() || raw.brand?.name?.trim() || term,
     brand: raw.brand?.name?.trim() || undefined,
     price: raw.price,
     oldPrice: raw.oldPrice ?? undefined,
@@ -86,6 +94,9 @@ export function normalizeOffer(raw: RawOffer, term: string): Offer | undefined {
     details: raw.description?.trim() || undefined,
     referencePrice: raw.referencePrice ?? undefined,
     referenceUnit: raw.unit?.shortName ?? undefined,
+    deposit: depositOf(raw.description),
+    category: raw.categories?.[0]?.name ?? undefined,
+    externalUrl: safeUrl(raw.externalUrl),
     imageUrl: `https://mg2de.b-cdn.net/api/v1/offers/${raw.id}/images/default/0/small.jpg`,
     loyalty: loyaltyOf(raw),
     source: "marktguru",
@@ -99,7 +110,7 @@ export function normalizeResults(results: RawOffer[], term: string): Offer[] {
   for (const raw of results) {
     const offer = normalizeOffer(raw, term);
     if (!offer) continue;
-    const key = [offer.market, offer.product, offer.price, offer.validUntil, offer.details].join("|");
+    const key = [offer.market, fullName(offer), offer.price, offer.validUntil, offer.details].join("|");
     if (seen.has(key)) continue;
     seen.add(key);
     offers.push(offer);

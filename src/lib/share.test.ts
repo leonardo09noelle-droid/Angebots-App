@@ -10,8 +10,10 @@ describe("shareText", () => {
     const offer: Offer = {
       id: "x",
       term: "Monster Energy",
-      product: "Monster Energy Energy Drink",
+      product: "Energy Drink",
+      brand: "Monster Energy",
       price: 0.99,
+      deposit: 0.25,
       referencePrice: 1.98,
       referenceUnit: "l",
       market: "Rewe",
@@ -20,7 +22,7 @@ describe("shareText", () => {
       source: "marktguru",
     };
     expect(shareText(offer, "https://example.app")).toBe(
-      "🏷️ Monster Energy Energy Drink bei Rewe für 0,99 € (1,98 €/l), gültig bis Sa., 31.10. – + Bonus mit REWE-App\n" +
+      "🏷️ Monster Energy Energy Drink bei Rewe für 0,99 € (+ 0,25 € Pfand, 1,98 €/l), gültig bis Sa., 31.10. – + Bonus mit REWE-App\n" +
         "Gefunden mit Angebots-Radar: https://example.app",
     );
   });

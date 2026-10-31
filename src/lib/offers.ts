@@ -13,6 +13,18 @@ export interface BrandGroup {
   cheapestId?: string;
 }
 
+/** Marke + Produkt, z. B. "Monster Energy Energy Drink"; ohne doppelte Marke */
+export function fullName(offer: Pick<Offer, "brand" | "product">): string {
+  const { brand, product } = offer;
+  if (!brand || product.toLowerCase().includes(brand.toLowerCase())) return product;
+  return `${brand} ${product}`;
+}
+
+/** "versch. Sorten" im Prospekt: mehrere Sorten, aber nicht unbedingt alle */
+export function variety(offer: Offer): "mixed" | undefined {
+  return offer.details && /versch(\.|iedene)\s*sorten/i.test(offer.details) ? "mixed" : undefined;
+}
+
 /** Heutiges Datum als YYYY-MM-DD in lokaler Zeit */
 export function todayISO(date = new Date()): string {
   const y = date.getFullYear();
@@ -92,6 +104,10 @@ const LOYALTY_APP: Record<Market, string> = {
   Edeka: "EDEKA-App",
   Kaufland: "Kaufland Card",
 };
+
+export function loyaltyApp(offer: Offer): string {
+  return LOYALTY_APP[offer.market];
+}
 
 export function loyaltyLabel(offer: Offer): string | undefined {
   if (offer.loyalty === "required") return `Nur mit ${LOYALTY_APP[offer.market]}`;

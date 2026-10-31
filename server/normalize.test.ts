@@ -12,7 +12,7 @@ describe("normalizeResults", () => {
     expect(offers).toHaveLength(1);
     expect(offers[0]).toMatchObject({
       term: "Monster Energy",
-      product: "Monster Energy Energy Drink",
+      product: "Energy Drink",
       brand: "Monster Energy",
       market: "Rewe",
       price: 0.99,
@@ -21,9 +21,19 @@ describe("normalizeResults", () => {
       validUntil: "2026-10-31",
       referencePrice: 1.98,
       referenceUnit: "l",
+      deposit: 0.25,
+      category: "Softdrinks",
+      externalUrl: undefined,
       loyalty: "bonus",
       source: "marktguru",
     });
+  });
+
+  it("übernimmt den Link zum Markt, falls vorhanden", () => {
+    const [offer] = normalizeResults(results, "Mon Chéri");
+    expect(offer).toMatchObject({ market: "Kaufland", product: "Mon Chéri Pralines", brand: "Ferrero" });
+    expect(offer.externalUrl).toMatch(/^https:\/\/filiale\.kaufland\.de\//);
+    expect(offer.deposit).toBeUndefined();
   });
 
   it("erkennt Kundenkarten-Pflicht und lässt normale Angebote ohne Hinweis", () => {
@@ -40,7 +50,7 @@ describe("normalizeResults", () => {
   });
 
   it("verlangt alle Wörter, auch zusammengeschrieben", () => {
-    expect(normalizeResults(results, "Monster Mampf").map((o) => o.product)).toEqual(["Covo Monster Mampf Mini"]);
+    expect(normalizeResults(results, "Monster Mampf").map((o) => o.product)).toEqual(["Monster Mampf Mini"]);
     expect(normalizeResults(results, "Monstermampf")).toHaveLength(1);
     expect(normalizeResults(results, "Red Bull")).toHaveLength(0);
   });

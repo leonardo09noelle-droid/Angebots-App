@@ -1,6 +1,8 @@
+import { useState } from "react";
 import type { Offer } from "../types";
 import { groupByBrand } from "../lib/offers";
 import { OfferCard } from "./OfferCard";
+import { OfferDetail } from "./OfferDetail";
 
 interface Props {
   /** Angebote eines Merklisten-Eintrags, schon sortiert (siehe groupByTerm) */
@@ -9,10 +11,13 @@ interface Props {
   onRemove?: (id: string) => void;
 }
 
-/** Angebote nach Marke gruppiert; "Günstigster" gibt es nur innerhalb einer Marke */
+/** Angebote nach Marke gruppiert; "Günstigster" gibt es nur innerhalb einer Marke. Antippen öffnet die Details. */
 export function OfferList({ offers, newIds, onRemove }: Props) {
+  const [openId, setOpenId] = useState<string | null>(null);
   const groups = groupByBrand(offers);
   const showBrands = groups.length > 1;
+  const openGroup = groups.find((g) => g.offers.some((o) => o.id === openId));
+  const openOffer = openGroup?.offers.find((o) => o.id === openId);
 
   return (
     <div className="brand-groups">
@@ -26,12 +31,28 @@ export function OfferList({ offers, newIds, onRemove }: Props) {
                 offer={offer}
                 cheapest={offer.id === group.cheapestId}
                 isNew={!!newIds?.has(offer.id)}
-                onRemove={onRemove}
+                hideBrand={showBrands}
+                onOpen={(o) => setOpenId(o.id)}
               />
             ))}
           </ul>
         </div>
       ))}
+
+      {openOffer && (
+        <OfferDetail
+          offer={openOffer}
+          cheapest={openOffer.id === openGroup?.cheapestId}
+          onClose={() => setOpenId(null)}
+          onRemove={
+            onRemove &&
+            ((id) => {
+              setOpenId(null);
+              onRemove(id);
+            })
+          }
+        />
+      )}
     </div>
   );
 }

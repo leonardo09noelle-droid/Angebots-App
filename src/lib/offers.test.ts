@@ -3,6 +3,7 @@ import type { Offer } from "../types";
 import {
   cheapestId,
   discountPercent,
+  fullName,
   groupByBrand,
   groupByTerm,
   isActive,
@@ -10,6 +11,7 @@ import {
   loyaltyLabel,
   markNew,
   todayISO,
+  variety,
 } from "./offers";
 
 const offer = (o: Partial<Offer>): Offer => ({
@@ -143,6 +145,23 @@ describe("markNew", () => {
   });
   it("neu ist, was vorher nicht gesehen wurde", () => {
     expect([...markNew(["a", "b", "c"], ["a"])]).toEqual(["b", "c"]);
+  });
+});
+
+describe("fullName", () => {
+  it("setzt die Marke davor, aber nicht doppelt", () => {
+    expect(fullName({ brand: "Monster Energy", product: "Energy Drink" })).toBe("Monster Energy Energy Drink");
+    expect(fullName({ brand: "Jameson", product: "Jameson Irish Whiskey" })).toBe("Jameson Irish Whiskey");
+    expect(fullName({ product: "Proteinriegel" })).toBe("Proteinriegel");
+  });
+});
+
+describe("variety", () => {
+  it("erkennt verschiedene Sorten", () => {
+    expect(variety(offer({ details: "versch. Sorten, koffeinhaltig" }))).toBe("mixed");
+    expect(variety(offer({ details: "Verschiedene Sorten" }))).toBe("mixed");
+    expect(variety(offer({ details: "Ultra White" }))).toBeUndefined();
+    expect(variety(offer({}))).toBeUndefined();
   });
 });
 

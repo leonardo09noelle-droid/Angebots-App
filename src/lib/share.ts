@@ -1,12 +1,15 @@
 import type { Offer } from "../types";
-import { formatDate, formatPrice, loyaltyLabel } from "./offers";
+import { formatDate, formatPrice, fullName, loyaltyLabel } from "./offers";
 
-/** "🏷️ Monster Energy Energy Drink bei Rewe für 0,99 € (1,98 €/l), gültig bis Sa., 31.10." + Link */
+/** "🏷️ Monster Energy Energy Drink bei Rewe für 0,99 € (+ 0,25 € Pfand, 1,98 €/l), gültig bis Sa., 31.10." + Link */
 export function shareText(offer: Offer, appUrl: string): string {
-  let line = `🏷️ ${offer.product} bei ${offer.market} für ${formatPrice(offer.price)}`;
+  let line = `🏷️ ${fullName(offer)} bei ${offer.market} für ${formatPrice(offer.price)}`;
+  const extras: string[] = [];
+  if (offer.deposit !== undefined) extras.push(`+ ${formatPrice(offer.deposit)} Pfand`);
   if (offer.referencePrice !== undefined && offer.referenceUnit) {
-    line += ` (${formatPrice(offer.referencePrice)}/${offer.referenceUnit})`;
+    extras.push(`${formatPrice(offer.referencePrice)}/${offer.referenceUnit}`);
   }
+  if (extras.length) line += ` (${extras.join(", ")})`;
   if (offer.validUntil) line += `, gültig bis ${formatDate(offer.validUntil)}`;
   const loyalty = loyaltyLabel(offer);
   if (loyalty) line += ` – ${loyalty}`;
