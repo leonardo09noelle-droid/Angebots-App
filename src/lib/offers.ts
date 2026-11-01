@@ -22,26 +22,36 @@ export function fullName(offer: Pick<Offer, "brand" | "product">): string {
   return `${brand} ${product}`;
 }
 
-function significantWords(text: string): string[] {
-  return text
-    .toLowerCase()
-    .split(/[^a-zäöüß0-9]+/)
-    .filter((w) => w.length >= 4);
-}
+/** Wörter, die nur die Gattung oder Verpackung beschreiben und auf der Karte nichts unterscheiden */
+const GENERIC_WORDS = new Set(
+  [
+    "energy", "drink", "drinks", "energydrink", "getränk", "erfrischungsgetränk", "softdrink",
+    "dose", "dosen", "flasche", "flaschen", "pet", "koffeinhaltig", "koffeinhaltiges",
+    "kohlensäurehaltig", "versch", "verschiedene", "sorten",
+  ].map(normalize),
+);
+
+/** Mengenangaben wie "0,5", "250 ml", "6x", "0,5-l-Dose" zeigt die Karte separat (offer.amount) */
+const SIZE_TOKEN = /^(\d+([.,]\d+)?(ml|cl|l|g|kg|x|er)?|ml|cl|l|g|kg|x|×|-|\d+[.,]?\d*-l-\w+)$/i;
 
 /**
- * Was groß auf der Karte steht. Ist der Produktname nur eine Gattung zur Marke
- * ("Energy Drink" bei "Monster Energy"), zählt die Marke. Sonst das Produkt mit Marke darunter.
- * hideBrand: Die Marke steht schon als Zwischenüberschrift darüber.
+ * Name auf der Karte: Marke plus das, was die Sorte unterscheidet.
+ * "Energy Drink" bei Red Bull -> "Red Bull", "Energy Drink XXL" bei Kong Strong -> "Kong Strong XXL",
+ * "Original 185 g" bei Pringles -> "Pringles Original".
  */
-export function displayName(offer: Offer, hideBrand = false): { title: string; subtitle?: string } {
+export function displayName(offer: Pick<Offer, "brand" | "product">): string {
   const { brand, product } = offer;
-  if (!brand || product.toLowerCase().includes(brand.toLowerCase())) return { title: product };
+  if (!brand) return product;
+  if (normalize(product).includes(normalize(brand))) return product;
 
-  const brandWords = new Set(significantWords(brand));
-  const generic = significantWords(product).some((w) => brandWords.has(w));
-  if (generic) return hideBrand ? { title: product } : { title: brand };
-  return hideBrand ? { title: product } : { title: product, subtitle: brand };
+  const brandWords = brand.split(/\s+/).map(normalize);
+  const kept = product.split(/\s+/).filter((word) => {
+    const n = normalize(word);
+    if (!n || SIZE_TOKEN.test(word) || GENERIC_WORDS.has(n)) return false;
+    // "Energy" steckt schon in "Monster Energy", "Cola" in "Coca-Cola"
+    return !brandWords.some((b) => b === n || b.includes(n));
+  });
+  return [brand, ...kept].join(" ");
 }
 
 /** REWE und EDEKA: viele Filialen gehören selbstständigen Kaufleuten, Angebote können abweichen */

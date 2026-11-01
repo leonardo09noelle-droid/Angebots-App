@@ -191,31 +191,25 @@ describe("fullName", () => {
 });
 
 describe("displayName", () => {
-  it("zeigt bei Gattungsnamen nur die Marke", () => {
-    expect(displayName(offer({ brand: "Monster Energy", product: "Energy Drink" }))).toEqual({ title: "Monster Energy" });
+  const name = (brand: string | undefined, product: string) => displayName({ brand, product });
+
+  it("zeigt bei Gattungsnamen die Marke statt 'Energy Drink'", () => {
+    expect(name("Red Bull", "Energy Drink")).toBe("Red Bull");
+    expect(name("Monster Energy", "Energy Drink")).toBe("Monster Energy");
+    expect(name("Kong Strong", "Energy Drink XXL")).toBe("Kong Strong XXL");
+    expect(name("Coca-Cola", "Cola Zero")).toBe("Coca-Cola Zero");
   });
 
-  it("zeigt sonst Produkt groß und Marke darunter", () => {
-    expect(displayName(offer({ brand: "Ferrero", product: "Mon Chéri Pralines" }))).toEqual({
-      title: "Mon Chéri Pralines",
-      subtitle: "Ferrero",
-    });
+  it("behält die Sorte und lässt Mengen weg", () => {
+    expect(name("Monster Energy", "Energy Drink Ultra White 0,5-l-Dose")).toBe("Monster Energy Ultra White");
+    expect(name("Pringles", "Original 185 g")).toBe("Pringles Original");
+    expect(name("Red Bull", "Energy Drink 4 x 250 ml")).toBe("Red Bull");
   });
 
-  it("wiederholt die Marke nicht, wenn sie schon im Produkt steht oder darüber", () => {
-    expect(displayName(offer({ brand: "Jameson", product: "Jameson Irish Whiskey" }))).toEqual({
-      title: "Jameson Irish Whiskey",
-    });
-    expect(displayName(offer({ brand: "Ferrero", product: "Mon Chéri Pralines" }), true)).toEqual({
-      title: "Mon Chéri Pralines",
-    });
-    expect(displayName(offer({ brand: "Monster Energy", product: "Energy Drink" }), true)).toEqual({
-      title: "Energy Drink",
-    });
-  });
-
-  it("ohne Marke einfach das Produkt", () => {
-    expect(displayName(offer({ product: "Proteinriegel" }))).toEqual({ title: "Proteinriegel" });
+  it("wiederholt die Marke nicht und kommt ohne Marke aus", () => {
+    expect(name("Jameson", "Jameson Irish Whiskey")).toBe("Jameson Irish Whiskey");
+    expect(name("Ferrero", "Mon Chéri Pralines")).toBe("Ferrero Mon Chéri Pralines");
+    expect(name(undefined, "Proteinriegel")).toBe("Proteinriegel");
   });
 });
 

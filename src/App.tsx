@@ -3,10 +3,12 @@ import type { Offer } from "./types";
 import { groupByTerm, markNew } from "./lib/offers";
 import { fetchOffers } from "./lib/api";
 import { allBrands } from "./lib/brands";
+import { APP_VERSION, RELEASES } from "./lib/changelog";
 import {
   learnBrands,
   loadLearnedBrands,
   loadMarkets,
+  loadSeenVersion,
   loadRemote,
   loadSeen,
   loadWatchlist,
@@ -15,6 +17,7 @@ import {
   saveMarkets,
   saveRemote,
   saveSeen,
+  saveSeenVersion,
   saveWatchlist,
   saveZip,
   type RemoteCache,
@@ -23,6 +26,7 @@ import { OfferList } from "./components/OfferList";
 import { MyProducts } from "./components/MyProducts";
 import { Search } from "./components/Search";
 import { Settings } from "./components/Settings";
+import { WhatsNew } from "./components/WhatsNew";
 
 type Tab = "offers" | "search" | "products" | "settings";
 
@@ -46,6 +50,8 @@ export default function App() {
   const [error, setError] = useState("");
   const [reloadToken, setReloadToken] = useState(0);
   const [learnedBrands, setLearnedBrands] = useState(loadLearnedBrands);
+  // "Was ist neu" einmal pro Version zeigen, nach dem ✕ nie wieder
+  const [showWhatsNew, setShowWhatsNew] = useState(() => loadSeenVersion() !== APP_VERSION);
   const brands = useMemo(() => allBrands(learnedBrands), [learnedBrands]);
 
   /** Marken aus Ergebnissen merken, für Vorschläge und "Meintest du …?" */
@@ -98,6 +104,11 @@ export default function App() {
   );
   const groups = useMemo(() => groupByTerm(visibleOffers, watchlist), [visibleOffers, watchlist]);
   const offerCounts = useMemo(() => new Map(groups.map((g) => [g.term, g.offers.length])), [groups]);
+
+  function closeWhatsNew() {
+    saveSeenVersion(APP_VERSION);
+    setShowWhatsNew(false);
+  }
 
   function addItem(term: string, brandOnly: boolean) {
     setWatchlist((prev) =>
@@ -192,6 +203,10 @@ export default function App() {
           <Settings zip={zip} onZipChange={setZip} markets={markets} onMarketsChange={setMarkets} />
         )}
       </main>
+
+      {showWhatsNew && RELEASES[0]?.version === APP_VERSION && (
+        <WhatsNew release={RELEASES[0]} onClose={closeWhatsNew} />
+      )}
 
       <nav className="tabbar">
         {TABS.map((t) => (

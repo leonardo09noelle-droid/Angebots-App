@@ -17,12 +17,10 @@ interface Props {
   offer: Offer;
   cheapest: boolean;
   isNew: boolean;
-  /** Marke steht schon als Zwischenüberschrift darüber */
-  hideBrand: boolean;
   onOpen: (offer: Offer) => void;
 }
 
-export function OfferCard({ offer, cheapest, isNew, hideBrand, onOpen }: Props) {
+export function OfferCard({ offer, cheapest, isNew, onOpen }: Props) {
   const [imageFailed, setImageFailed] = useState(false);
   const { share, feedback } = useShare(offer);
   const discount = discountPercent(offer);
@@ -30,7 +28,7 @@ export function OfferCard({ offer, cheapest, isNew, hideBrand, onOpen }: Props) 
   const lastDay = isLastDay(offer);
   const loyalty = loyaltyLabel(offer);
   const mixed = variety(offer) === "mixed";
-  const name = displayName(offer, hideBrand);
+  const title = displayName(offer);
 
   function onShareClick(e: MouseEvent) {
     e.stopPropagation(); // nicht gleichzeitig die Details öffnen
@@ -61,8 +59,8 @@ export function OfferCard({ offer, cheapest, isNew, hideBrand, onOpen }: Props) 
       )}
 
       <div className="offer-main">
-        <div className="offer-product">{name.title}</div>
-        {name.subtitle && <div className="offer-brand">{name.subtitle}</div>}
+        <div className="offer-product">{title}</div>
+        {offer.amount && <div className="offer-amount">{offer.amount}</div>}
         <div className="offer-meta">
           <span className="offer-market">{offer.market}</span>
           {cheapest && <span className="best">Günstigster</span>}

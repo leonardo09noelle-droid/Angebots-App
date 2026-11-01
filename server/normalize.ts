@@ -11,6 +11,10 @@ export interface RawOffer {
   price?: number | null;
   oldPrice?: number | null;
   requiresLoyalityMembership?: boolean | null;
+  /** Menge pro Stück in `unit`, z. B. 0.5 (l) */
+  volume?: number | null;
+  /** Stückzahl im Pack */
+  quantity?: number | null;
   referencePrice?: number | null;
   unit?: { shortName?: string } | null;
   advertisers?: { name?: string }[] | null;
@@ -72,6 +76,24 @@ function oldPriceOf(raw: RawOffer, price: number): number | undefined {
   return candidate !== undefined && candidate > price ? candidate : undefined;
 }
 
+const decimal = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 2 });
+
+/** 0.25 l -> "250 ml", 1.5 l -> "1,5 l", 0.185 kg -> "185 g" */
+function formatAmount(value: number, unit: string): string | undefined {
+  if (unit === "l") return value < 1 ? `${Math.round(value * 1000)} ml` : `${decimal.format(value)} l`;
+  if (unit === "kg") return value < 1 ? `${Math.round(value * 1000)} g` : `${decimal.format(value)} kg`;
+  return undefined;
+}
+
+/** Füllmenge, bei Packs mit Stückzahl: "6 × 330 ml" */
+function amountOf(raw: RawOffer): string | undefined {
+  const unit = raw.unit?.shortName;
+  if (!raw.volume || raw.volume <= 0 || !unit) return undefined;
+  const one = formatAmount(raw.volume, unit);
+  if (!one) return undefined;
+  return raw.quantity && raw.quantity > 1 ? `${raw.quantity} × ${one}` : one;
+}
+
 /** Nur echte Web-Links übernehmen */
 function safeUrl(url: string | null | undefined): string | undefined {
   return url && /^https:\/\//i.test(url) ? url : undefined;
@@ -106,6 +128,7 @@ export function normalizeOffer(raw: RawOffer, term: string): Offer | undefined {
     details: raw.description?.trim() || undefined,
     referencePrice: raw.referencePrice ?? undefined,
     referenceUnit: raw.unit?.shortName ?? undefined,
+    amount: amountOf(raw),
     deposit: depositOf(raw.description),
     category: raw.categories?.[0]?.name ?? undefined,
     externalUrl: safeUrl(raw.externalUrl),
@@ -125,7 +148,7 @@ export function normalizeResults(results: RawOffer[], term: string): Offer[] {
   for (const raw of results) {
     const offer = normalizeOffer(raw, term);
     if (!offer) continue;
-    const key = [offer.market, fullName(offer).toLowerCase(), offer.price, offer.validUntil].join("|");
+    const key = [offer.market, fullName(offer).toLowerCase(), offer.amount, offer.price, offer.validUntil].join("|");
     const existing = byKey.get(key);
     if (!existing) {
       byKey.set(key, offer);

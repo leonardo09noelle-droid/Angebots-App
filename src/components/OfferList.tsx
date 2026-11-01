@@ -30,7 +30,6 @@ export function OfferList({ offers, newIds }: Props) {
                 offer={offer}
                 cheapest={offer.id === group.cheapestId}
                 isNew={!!newIds?.has(offer.id)}
-                hideBrand={showBrands}
                 onOpen={(o) => setOpenId(o.id)}
               />
             ))}

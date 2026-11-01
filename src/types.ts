@@ -36,6 +36,8 @@ export interface Offer {
   /** Grundpreis, z. B. 1.98 mit referenceUnit "l" = 1,98 €/l */
   referencePrice?: number;
   referenceUnit?: string;
+  /** Füllmenge, z. B. "250 ml" oder "6 × 330 ml" */
+  amount?: string;
   /** Pfand pro Stück in €, z. B. 0.25 */
   deposit?: number;
   /** z. B. "Softdrinks" */

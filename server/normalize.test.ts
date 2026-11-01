@@ -21,6 +21,7 @@ describe("normalizeResults", () => {
       validUntil: "2026-10-31",
       referencePrice: 1.98,
       referenceUnit: "l",
+      amount: "500 ml",
       deposit: 0.25,
       category: "Softdrinks",
       externalUrl: undefined,
@@ -54,6 +55,15 @@ describe("normalizeResults", () => {
     expect(normalizeResults([{ ...base, oldPrice: 1.39, description: "statt 1,49" }], "Monster Energy")[0].oldPrice).toBe(
       1.39,
     );
+  });
+
+  it("zeigt die Füllmenge, bei Packs mit Stückzahl", () => {
+    const covo = results.find((r) => r.product?.name === "Monster Mampf Mini")!; // 6 × 0,038 kg
+    expect(normalizeResults([covo], "Monster Mampf")[0].amount).toBe("6 × 38 g");
+    const rewe = results.find((r) => r.product?.name === "Energy Drink")!;
+    expect(normalizeResults([{ ...rewe, volume: 0.25, quantity: 4 }], "Monster Energy")[0].amount).toBe("4 × 250 ml");
+    expect(normalizeResults([{ ...rewe, volume: 1.5 }], "Monster Energy")[0].amount).toBe("1,5 l");
+    expect(normalizeResults([{ ...rewe, volume: null }], "Monster Energy")[0].amount).toBeUndefined();
   });
 
   it("verwirft Kaufland-Angebote", () => {

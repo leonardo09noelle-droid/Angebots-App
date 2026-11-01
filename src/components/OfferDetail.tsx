@@ -43,9 +43,9 @@ export function OfferDetail({ offer, cheapest, onClose }: Props) {
   const discount = discountPercent(offer);
   const validity = validityText(offer);
   const app = loyaltyApp(offer);
-  // Groß der Anzeigename, darunter der jeweils andere Teil (z. B. "Monster Energy" / "Energy Drink")
-  const title = displayName(offer).title;
-  const subtitle = title === offer.product ? offer.brand : offer.product;
+  // Groß der Anzeigename ("Red Bull"), darunter der Produktname laut Prospekt ("Energy Drink")
+  const title = displayName(offer);
+  const subtitle = offer.product;
 
   // Escape schließt, dahinter scrollt nichts mit
   useEffect(() => {
@@ -114,6 +114,12 @@ export function OfferDetail({ offer, cheapest, onClose }: Props) {
               {cheapest && <span className="best">Günstigster</span>}
             </dd>
           </div>
+          {offer.amount && (
+            <div>
+              <dt>Menge</dt>
+              <dd>{offer.amount}</dd>
+            </div>
+          )}
           <div>
             <dt>Normalpreis</dt>
             {offer.oldPrice !== undefined && discount !== undefined ? (
