@@ -42,11 +42,14 @@ export function WhatsNew({ releases, onClose }: Props) {
                 onClick={() => setIndex(i)}
               >
                 Version {r.version}
+                {r.revision ? " · neu" : ""}
               </button>
             ))}
           </div>
         ) : (
-          <span className="whatsnew-version">Neu in Version {release.version}</span>
+          <span className="whatsnew-version">
+            {release.revision ? `Version ${release.version} – aktualisiert` : `Neu in Version ${release.version}`}
+          </span>
         )}
 
         <h2 id="whatsnew-title">{release.title}</h2>

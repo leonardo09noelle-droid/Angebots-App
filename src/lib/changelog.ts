@@ -1,9 +1,12 @@
 /**
  * Versionen fürs "Was ist neu"-Fenster, neueste zuerst. Bei einem neuen Update oben einen Eintrag
- * ergänzen. Kleine Verbesserungen kommen in den Eintrag der aktuellen Version, ohne neue Nummer.
+ * ergänzen. Kleine Nachbesserungen kommen in den Eintrag der aktuellen Version, ohne neue Nummer:
+ * dann `revision` hochzählen, damit alle das aufgefrischte Fenster noch einmal sehen.
  */
 export interface Release {
   version: string;
+  /** Nachbesserung derselben Version (2, 3, …) */
+  revision?: number;
   title: string;
   /** Wichtigstes zuerst */
   highlights: { icon: string; title: string; text: string }[];
@@ -12,6 +15,7 @@ export interface Release {
 export const RELEASES: Release[] = [
   {
     version: "1.6",
+    revision: 2,
     title: "Wischen & Liquid Glass",
     highlights: [
       {
@@ -19,8 +23,9 @@ export const RELEASES: Release[] = [
         title: "Zwischen Tabs wischen",
         text:
           "Wisch auf dem Bildschirm einfach nach links oder rechts, um zum nächsten Tab zu kommen, " +
-          "z. B. von Suchen zu Produkte. Oder leg den Finger auf die Leiste unten und zieh ihn " +
-          "zum Tab, den du willst: Die Glas-Blase folgt deinem Finger.",
+          "z. B. von Suchen zu Produkte. Die Seite folgt dabei deinem Finger und gleitet weich " +
+          "herein. Oder leg den Finger auf die Leiste unten und zieh ihn zum Tab, den du willst: " +
+          "Die Glas-Blase folgt deinem Finger.",
       },
       {
         icon: "🫧",
@@ -28,11 +33,17 @@ export const RELEASES: Release[] = [
         text: "Die Tab-Leiste ist jetzt aus „Glas“: durchscheinend, mit Glanzkante und einer Blase, die zum Tab gleitet.",
       },
       {
-        icon: "📐",
-        title: "Bis an den Rand",
+        icon: "🛠️",
+        title: "Fehler behoben",
         text:
-          "Die App nutzt jetzt den ganzen Bildschirm, unten bleibt kein farbiger Streifen mehr frei. " +
-          "Oben ist die Kopfzeile klarer, die Postleitzahl ist besser lesbar.",
+          "Auf manchen Handys (vor allem Android) ist die App beim Wechseln der Tabs abgestürzt. " +
+          "Das ist behoben. Die Tab-Leiste ist wieder ganz sichtbar, und der Rand unten hat jetzt " +
+          "die Farbe der App statt Türkis.",
+      },
+      {
+        icon: "📐",
+        title: "Klarere Kopfzeile",
+        text: "Titel und Postleitzahl oben sitzen etwas tiefer und sind besser lesbar.",
       },
     ],
   },
@@ -103,7 +114,12 @@ export const RELEASES: Release[] = [
   },
 ];
 
-/** Alle Versionen, deren Neuigkeiten noch nicht weggeklickt wurden, neueste zuerst */
+/** Merk-Schlüssel: "1.6" bzw. "1.6#2" für die zweite Fassung von 1.6 */
+export function releaseKey(release: Release): string {
+  return release.revision ? `${release.version}#${release.revision}` : release.version;
+}
+
+/** Alle Versionen, deren (aktuelle Fassung der) Neuigkeiten noch nicht weggeklickt wurden, neueste zuerst */
 export function unseenReleases(seen: string[], releases: Release[] = RELEASES): Release[] {
-  return releases.filter((r) => !seen.includes(r.version));
+  return releases.filter((r) => !seen.includes(releaseKey(r)));
 }

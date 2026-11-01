@@ -95,27 +95,13 @@ select:focus {
   flex-direction: column;
 }
 
-/*
- * Als installierte App gibt das iPhone der Seite beim Start manchmal nicht die volle Höhe;
- * unten blieb dann ~1 cm der Startbildschirm-Farbe sichtbar. Darum hier ausdrücklich den ganzen
- * Bildschirm belegen ("lvh" = volle Höhe; im Browser mit Adressleiste wäre das zu hoch).
- */
-@media (display-mode: standalone) {
-  .app {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 100lvh;
-  }
-}
-
 .app-header {
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: calc(env(safe-area-inset-top) + 18px) max(16px, calc((100% - 640px) / 2)) 10px;
+  /* iOS legt über die oberste Zone eine leichte Unschärfe: Titel und PLZ deshalb darunter */
+  padding: calc(env(safe-area-inset-top) + 30px) max(16px, calc((100% - 640px) / 2)) 10px;
   background: var(--bg);
 }
 
@@ -148,6 +134,48 @@ select:focus {
 
 .content::-webkit-scrollbar {
   display: none;
+}
+
+.tech-info {
+  margin: 4px 2px 0;
+  font-size: 11px;
+  color: var(--muted);
+  opacity: 0.8;
+}
+
+/* Senkrecht scrollt der Browser selbst, waagerechte Wische übernimmt die App */
+.content {
+  touch-action: pan-y;
+}
+
+/* Neue Seite gleitet beim Tab-Wechsel von der passenden Seite herein */
+.tab-page.slide-left {
+  animation: page-from-right 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.tab-page.slide-right {
+  animation: page-from-left 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes page-from-right {
+  from {
+    transform: translateX(48px);
+    opacity: 0;
+  }
+}
+
+@keyframes page-from-left {
+  from {
+    transform: translateX(-48px);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab-page.slide-left,
+  .tab-page.slide-right {
+    animation: none;
+  }
 }
 
 .group {

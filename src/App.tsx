@@ -3,7 +3,7 @@ import type { Offer } from "./types";
 import { groupByTerm, markNew } from "./lib/offers";
 import { fetchOffers } from "./lib/api";
 import { allBrands } from "./lib/brands";
-import { unseenReleases } from "./lib/changelog";
+import { releaseKey, unseenReleases } from "./lib/changelog";
 import {
   learnBrands,
   loadLearnedBrands,
@@ -43,6 +43,8 @@ const timeFormat = new Intl.DateTimeFormat("de-DE", { weekday: "short", hour: "2
 
 export default function App() {
   const [tab, setTab] = useState<Tab>("offers");
+  // Richtung des letzten Tab-Wechsels, damit die neue Seite von der passenden Seite hereingleitet
+  const [slide, setSlide] = useState<"left" | "right" | null>(null);
   const [watchlist, setWatchlist] = useState(loadWatchlist);
   const [zip, setZip] = useState(loadZip);
   const [markets, setMarkets] = useState(loadMarkets);
@@ -69,10 +71,21 @@ export default function App() {
     contentRef.current?.scrollTo({ top: 0 });
   }, [tab]);
 
+  function goTo(next: Tab) {
+    const from = TABS.findIndex((t) => t.id === tab);
+    const to = TABS.findIndex((t) => t.id === next);
+    if (from === to) return;
+    setSlide(to > from ? "left" : "right");
+    setTab(next);
+  }
+
   // Wischen im Inhalt: nach links = nächster Tab, nach rechts = vorheriger
-  const swipe = useSwipeTabs((direction) => {
+  const pageRef = useRef<HTMLDivElement>(null);
+  const swipe = useSwipeTabs(pageRef, (direction) => {
     const next = TABS.findIndex((t) => t.id === tab) + direction;
-    if (next >= 0 && next < TABS.length) setTab(TABS[next].id);
+    if (next < 0 || next >= TABS.length) return false;
+    goTo(TABS[next].id);
+    return true;
   });
 
   useEffect(() => {
@@ -130,7 +143,7 @@ export default function App() {
   const offerCounts = useMemo(() => new Map(groups.map((g) => [g.term, g.offers.length])), [groups]);
 
   function closeWhatsNew() {
-    saveSeenVersions([...new Set([...loadSeenVersions(), ...missedReleases.map((r) => r.version)])]);
+    saveSeenVersions([...new Set([...loadSeenVersions(), ...missedReleases.map(releaseKey)])]);
     setMissedReleases([]);
   }
 
@@ -160,6 +173,8 @@ export default function App() {
       </header>
 
       <main className="content" ref={contentRef} {...swipe}>
+        {/* key: bei jedem Tab neu, damit die Gleit-Animation jedes Mal läuft */}
+        <div key={tab} ref={pageRef} className={`tab-page${slide ? ` slide-${slide}` : ""}`}>
         {tab === "offers" && (
           <>
             {!validZip ? (
@@ -226,11 +241,12 @@ export default function App() {
         {tab === "settings" && (
           <Settings zip={zip} onZipChange={setZip} markets={markets} onMarketsChange={setMarkets} />
         )}
+        </div>
       </main>
 
       {missedReleases.length > 0 && <WhatsNew releases={missedReleases} onClose={closeWhatsNew} />}
 
-      <TabBar tabs={TABS} active={tab} onChange={setTab} />
+      <TabBar tabs={TABS} active={tab} onChange={goTo} />
     </div>
   );
 }
