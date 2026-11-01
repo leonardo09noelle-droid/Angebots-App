@@ -1,13 +1,17 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { Release } from "../lib/changelog";
 
 interface Props {
-  release: Release;
+  /** verpasste Versionen, neueste zuerst */
+  releases: Release[];
   onClose: () => void;
 }
 
-/** "Was ist neu"-Fenster, erscheint pro Version nur einmal */
-export function WhatsNew({ release, onClose }: Props) {
+/** "Was ist neu"-Fenster; bei mehreren verpassten Versionen mit Reitern ("1.5 | 1.4") */
+export function WhatsNew({ releases, onClose }: Props) {
+  const [index, setIndex] = useState(0);
+  const release = releases[Math.min(index, releases.length - 1)];
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -26,7 +30,25 @@ export function WhatsNew({ release, onClose }: Props) {
         <button className="sheet-close" onClick={onClose} aria-label="Schließen">
           ✕
         </button>
-        <span className="whatsnew-version">Neu in Version {release.version}</span>
+
+        {releases.length > 1 ? (
+          <div className="whatsnew-tabs" role="tablist" aria-label="Versionen">
+            {releases.map((r, i) => (
+              <button
+                key={r.version}
+                role="tab"
+                aria-selected={i === index}
+                className={`whatsnew-tab${i === index ? " active" : ""}`}
+                onClick={() => setIndex(i)}
+              >
+                Version {r.version}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <span className="whatsnew-version">Neu in Version {release.version}</span>
+        )}
+
         <h2 id="whatsnew-title">{release.title}</h2>
         <ul className="whatsnew-list">
           {release.highlights.map((h) => (
@@ -41,9 +63,16 @@ export function WhatsNew({ release, onClose }: Props) {
             </li>
           ))}
         </ul>
-        <button className="primary big" onClick={onClose}>
-          Los geht's
-        </button>
+
+        {index < releases.length - 1 ? (
+          <button className="primary big" onClick={() => setIndex(index + 1)}>
+            Weiter zu Version {releases[index + 1].version} ›
+          </button>
+        ) : (
+          <button className="primary big" onClick={onClose}>
+            Los geht's
+          </button>
+        )}
       </div>
     </div>
   );

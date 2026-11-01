@@ -3,12 +3,12 @@ import type { Offer } from "./types";
 import { groupByTerm, markNew } from "./lib/offers";
 import { fetchOffers } from "./lib/api";
 import { allBrands } from "./lib/brands";
-import { APP_VERSION, RELEASES } from "./lib/changelog";
+import { unseenReleases } from "./lib/changelog";
 import {
   learnBrands,
   loadLearnedBrands,
   loadMarkets,
-  loadSeenVersion,
+  loadSeenVersions,
   loadRemote,
   loadSeen,
   loadWatchlist,
@@ -17,7 +17,7 @@ import {
   saveMarkets,
   saveRemote,
   saveSeen,
-  saveSeenVersion,
+  saveSeenVersions,
   saveWatchlist,
   saveZip,
   type RemoteCache,
@@ -50,8 +50,8 @@ export default function App() {
   const [error, setError] = useState("");
   const [reloadToken, setReloadToken] = useState(0);
   const [learnedBrands, setLearnedBrands] = useState(loadLearnedBrands);
-  // "Was ist neu" einmal pro Version zeigen, nach dem ✕ nie wieder
-  const [showWhatsNew, setShowWhatsNew] = useState(() => loadSeenVersion() !== APP_VERSION);
+  // "Was ist neu": alle verpassten Versionen zeigen, nach dem ✕ nie wieder
+  const [missedReleases, setMissedReleases] = useState(() => unseenReleases(loadSeenVersions()));
   const brands = useMemo(() => allBrands(learnedBrands), [learnedBrands]);
 
   /** Marken aus Ergebnissen merken, für Vorschläge und "Meintest du …?" */
@@ -110,8 +110,8 @@ export default function App() {
   const offerCounts = useMemo(() => new Map(groups.map((g) => [g.term, g.offers.length])), [groups]);
 
   function closeWhatsNew() {
-    saveSeenVersion(APP_VERSION);
-    setShowWhatsNew(false);
+    saveSeenVersions([...new Set([...loadSeenVersions(), ...missedReleases.map((r) => r.version)])]);
+    setMissedReleases([]);
   }
 
   function addItem(term: string, brandOnly: boolean) {
@@ -208,9 +208,7 @@ export default function App() {
         )}
       </main>
 
-      {showWhatsNew && RELEASES[0]?.version === APP_VERSION && (
-        <WhatsNew release={RELEASES[0]} onClose={closeWhatsNew} />
-      )}
+      {missedReleases.length > 0 && <WhatsNew releases={missedReleases} onClose={closeWhatsNew} />}
 
       <nav className="tabbar">
         {TABS.map((t) => (

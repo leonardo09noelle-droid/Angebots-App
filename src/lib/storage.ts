@@ -12,6 +12,7 @@ const KEYS = {
   seen: "angebote.seen",
   brands: "angebote.brands",
   seenVersion: "angebote.seenVersion",
+  seenVersions: "angebote.seenVersions",
 };
 
 const MAX_SEEN = 2000;
@@ -79,9 +80,18 @@ export function learnBrands(previous: string[], offers: Offer[]): string[] {
 export const loadZip = () => read<string>(KEYS.zip, "");
 export const saveZip = (zip: string) => write(KEYS.zip, zip);
 
-/** Version, deren "Was ist neu"-Fenster schon weggeklickt wurde */
-export const loadSeenVersion = () => read<string | null>(KEYS.seenVersion, null);
-export const saveSeenVersion = (version: string) => write(KEYS.seenVersion, version);
+/**
+ * Versionen, deren "Was ist neu" schon weggeklickt wurde. Früher wurde nur die letzte gemerkt
+ * (seenVersion); daraus wird nur genau diese übernommen, damit verpasste ältere noch erscheinen.
+ */
+export function loadSeenVersions(): string[] {
+  const list = read<string[] | null>(KEYS.seenVersions, null);
+  if (list) return list;
+  const legacy = read<string | null>(KEYS.seenVersion, null);
+  return legacy ? [legacy] : [];
+}
+
+export const saveSeenVersions = (versions: string[]) => write(KEYS.seenVersions, versions);
 
 /** Selbst eingetragene Angebote gibt es nicht mehr: alten Speicher einmal aufräumen */
 export function removeLegacyOffers(): void {

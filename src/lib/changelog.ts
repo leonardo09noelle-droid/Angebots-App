@@ -1,6 +1,7 @@
-/** Aktuelle Version. Bei jedem Update erhöhen und oben in RELEASES einen Eintrag ergänzen. */
-export const APP_VERSION = "1.5";
-
+/**
+ * Versionen fürs "Was ist neu"-Fenster, neueste zuerst. Bei einem neuen Update oben einen Eintrag
+ * ergänzen. Kleine Verbesserungen kommen in den Eintrag der aktuellen Version, ohne neue Nummer.
+ */
 export interface Release {
   version: string;
   title: string;
@@ -15,18 +16,24 @@ export const RELEASES: Release[] = [
     highlights: [
       {
         icon: "🍬",
-        title: "Suche versteht mehr Wörter",
-        text: "„Gummibärchen“ findet jetzt auch Fruchtgummi, „Limo“ auch Limonade, „Sprudel“ auch Mineralwasser.",
+        title: "Die Suche versteht mehr Wörter",
+        text:
+          "Du musst nicht mehr genau das Wort aus dem Prospekt treffen: „Gummibärchen“ findet jetzt auch " +
+          "Fruchtgummi, „Limo“ auch Limonade, „Sprudel“ auch Mineralwasser und „Süßigkeiten“ gleich " +
+          "Schokolade, Fruchtgummi und Bonbons. Das gilt auch für deine Produkte-Liste.",
       },
       {
         icon: "📱",
         title: "Neue Tab-Leiste",
-        text: "Abgerundet und schwebend, und kein dunkler Streifen mehr beim Öffnen.",
+        text:
+          "Die Leiste unten ist jetzt abgerundet, schwebt über dem Inhalt und sitzt direkt über dem " +
+          "Home-Balken. Der dunkle Streifen beim Öffnen der App ist weg, und beim Wechseln der Tabs " +
+          "startest du immer oben.",
       },
       {
         icon: "🐻",
         title: "Mehr in den Kategorien",
-        text: "Fruchtgummi zeigt auch Gummibärchen, Kekse auch Cookies.",
+        text: "„Fruchtgummi“ zeigt jetzt auch Gummibärchen, „Kekse“ auch Cookies.",
       },
     ],
   },
@@ -37,28 +44,40 @@ export const RELEASES: Release[] = [
       {
         icon: "🔍",
         title: "Intelligente Suche",
-        text: "Die Suche erkennt Marken und verzeiht Tippfehler: aus „Prngles“ wird Pringles.",
+        text:
+          "Beim Tippen schlägt die App passende Marken vor. Vertippt? Aus „Prngles“ wird automatisch " +
+          "Pringles. Wenn du wirklich etwas anderes meintest, tippst du einfach auf „stattdessen suchen“.",
       },
       {
         icon: "🗂️",
         title: "Kategorien",
-        text: "Energy Drinks, Chips, Schokolade & mehr mit einem Tipp durchstöbern.",
+        text:
+          "Im Suchen-Tab findest du jetzt Kacheln für Energy Drinks, Cola & Limo, Eistee, Wasser, Chips, " +
+          "Schokolade, Fruchtgummi und Kekse. Oben kannst du die Ergebnisse nach Marke filtern und eine " +
+          "Marke mit einem Tipp auf deine Liste setzen.",
       },
       {
         icon: "🏷️",
         title: "Nur deine Marke",
-        text: "Pro Produkt einstellbar: z. B. nur echte Pringles statt aller Chips.",
+        text:
+          "Unter Produkte kannst du pro Eintrag „Nur Marke“ einschalten: dann siehst du z. B. nur echte " +
+          "Pringles statt aller Chips, oder bei Monster kein „Monster Mampf“ mehr.",
       },
       {
         icon: "🥤",
         title: "Füllmenge auf einen Blick",
-        text: "250 ml, 6 × 330 ml … steht jetzt direkt auf jedem Angebot.",
+        text: "Auf jedem Angebot steht jetzt, wie viel drin ist: 250 ml, 500 ml oder bei Packs 4 × 250 ml.",
       },
       {
         icon: "✨",
         title: "Klarere Namen",
-        text: "„Red Bull“ statt fünfmal „Energy Drink“.",
+        text: "Statt fünfmal „Energy Drink“ steht jetzt da, was es ist: Red Bull, Monster Energy, Kong Strong XXL.",
       },
     ],
   },
 ];
+
+/** Alle Versionen, deren Neuigkeiten noch nicht weggeklickt wurden, neueste zuerst */
+export function unseenReleases(seen: string[], releases: Release[] = RELEASES): Release[] {
+  return releases.filter((r) => !seen.includes(r.version));
+}
