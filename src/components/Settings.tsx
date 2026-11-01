@@ -1,26 +1,4 @@
-import { useEffect, useState } from "react";
 import { MARKETS, type Market } from "../types";
-
-/** Maße des Bildschirms, wie die App sie sieht. Hilft bei Darstellungsproblemen auf dem Handy. */
-function useScreenInfo(): string {
-  const [info, setInfo] = useState("");
-  useEffect(() => {
-    // Sicherheitsabstände (Notch, Home-Balken) lassen sich nur über ein Mess-Element auslesen
-    const probe = document.createElement("div");
-    probe.style.cssText =
-      "position:fixed;visibility:hidden;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)";
-    document.body.appendChild(probe);
-    const style = getComputedStyle(probe);
-    const standalone = matchMedia("(display-mode: standalone)").matches;
-    setInfo(
-      `Fenster ${window.innerWidth}×${window.innerHeight} · Bildschirm ${screen.width}×${screen.height} · ` +
-        `Rand oben ${parseInt(style.paddingTop)} / unten ${parseInt(style.paddingBottom)} · ` +
-        `App-Modus ${standalone ? "ja" : "nein"}`,
-    );
-    probe.remove();
-  }, []);
-  return info;
-}
 
 interface Props {
   zip: string;
@@ -30,8 +8,6 @@ interface Props {
 }
 
 export function Settings({ zip, onZipChange, markets, onMarketsChange }: Props) {
-  const screenInfo = useScreenInfo();
-
   function toggleMarket(market: Market) {
     // Reihenfolge wie in MARKETS behalten
     const next = markets.includes(market) ? markets.filter((m) => m !== market) : [...markets, market];
@@ -64,8 +40,6 @@ export function Settings({ zip, onZipChange, markets, onMarketsChange }: Props) 
           placeholder="z. B. 10115"
         />
       </section>
-
-      <p className="tech-info">Technik-Info: {screenInfo}</p>
     </div>
   );
 }

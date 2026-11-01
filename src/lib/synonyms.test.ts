@@ -8,6 +8,7 @@ describe("expandQuery", () => {
     expect(expandQuery("Gummibärchen")).toEqual(["Gummibärchen", "Fruchtgummi"]);
     expect(expandQuery("energydrink")).toEqual(["energydrink", "Energy Drink"]);
     expect(expandQuery("Süßigkeiten")).toEqual(["Süßigkeiten", "Schokolade", "Fruchtgummi"]);
+    expect(expandQuery("High Protein")).toEqual(["High Protein", "Protein", "Eiweiß"]);
   });
 
   it("verzeiht kleine Tippfehler bei den Stichwörtern", () => {

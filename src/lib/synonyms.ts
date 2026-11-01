@@ -12,6 +12,7 @@ const GROUPS: { keys: string[]; queries: string[] }[] = [
   { keys: ["Kekse", "Keks", "Plätzchen", "Cookies"], queries: ["Kekse", "Cookies"] },
   { keys: ["Chips", "Crisps", "Kartoffelchips"], queries: ["Chips"] },
   { keys: ["Proteinriegel", "Eiweißriegel", "Proteinbar", "Protein Bar"], queries: ["Proteinriegel", "Eiweißriegel"] },
+  { keys: ["Protein", "High Protein", "Eiweiß"], queries: ["Protein", "Eiweiß"] },
   { keys: ["Eistee", "Ice Tea", "Icetea"], queries: ["Eistee"] },
   { keys: ["Eis", "Eiscreme", "Speiseeis"], queries: ["Eiscreme"] },
   { keys: ["Bier", "Pils"], queries: ["Bier", "Pils"] },

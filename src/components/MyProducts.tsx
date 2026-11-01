@@ -22,17 +22,40 @@ const SUGGESTIONS = [
   "Jack Daniel's",
 ];
 
-/** Merkliste: was die App für dich sucht */
+/** Kommas trennen in der Suche die Produkte, deshalb raus damit */
+function cleanTerm(term: string): string {
+  return term.replace(/,/g, " ").replace(/\s+/g, " ").trim();
+}
+
+/** Merkliste: was die App für dich sucht; Name antippen zum Umbenennen */
 export function MyProducts({ watchlist, onWatchlistChange, offerCounts, brands }: Props) {
   const [newTerm, setNewTerm] = useState("");
+  // Eintrag, der gerade umbenannt wird, und der Text im Feld
+  const [editing, setEditing] = useState<string | null>(null);
+  const [draft, setDraft] = useState("");
   const has = (term: string) => watchlist.some((w) => w.term.toLowerCase() === term.toLowerCase());
 
   function add(term: string) {
-    // Kommas trennen in der Suche die Produkte, deshalb raus damit
-    const clean = term.replace(/,/g, " ").replace(/\s+/g, " ").trim();
+    const clean = cleanTerm(term);
     if (clean && !has(clean)) {
       onWatchlistChange([...watchlist, { term: clean, brandOnly: isKnownBrand(clean, brands) }]);
     }
+  }
+
+  function startEdit(term: string) {
+    setEditing(term);
+    setDraft(term);
+  }
+
+  /** Umbenennen übernehmen; leer, unverändert oder schon vorhanden: einfach schließen */
+  function saveEdit() {
+    if (editing === null) return;
+    const clean = cleanTerm(draft);
+    const taken = watchlist.some((w) => w.term !== editing && w.term.toLowerCase() === clean.toLowerCase());
+    if (clean && clean !== editing && !taken) {
+      onWatchlistChange(watchlist.map((w) => (w.term === editing ? { ...w, term: clean } : w)));
+    }
+    setEditing(null);
   }
 
   function toggleBrandOnly(term: string) {
@@ -59,12 +82,34 @@ export function MyProducts({ watchlist, onWatchlistChange, offerCounts, brands }
               const count = offerCounts.get(w.term) ?? 0;
               return (
                 <li key={w.term}>
-                  <span className="watch-name">
-                    {w.term}
-                    <span className="watch-count">
-                      {count === 0 ? "gerade kein Angebot" : count === 1 ? "1 Angebot" : `${count} Angebote`}
-                    </span>
-                  </span>
+                  {editing === w.term ? (
+                    <form
+                      className="watch-edit"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        saveEdit();
+                      }}
+                    >
+                      <input
+                        autoFocus
+                        value={draft}
+                        onChange={(e) => setDraft(e.target.value)}
+                        onBlur={saveEdit}
+                        onKeyDown={(e) => e.key === "Escape" && setEditing(null)}
+                        enterKeyHint="done"
+                        aria-label={`${w.term} umbenennen`}
+                      />
+                    </form>
+                  ) : (
+                    <button className="watch-name" onClick={() => startEdit(w.term)} title="Antippen zum Umbenennen">
+                      <span className="watch-term">
+                        {w.term} <span className="watch-edit-hint" aria-hidden>✎</span>
+                      </span>
+                      <span className="watch-count">
+                        {count === 0 ? "gerade kein Angebot" : count === 1 ? "1 Angebot" : `${count} Angebote`}
+                      </span>
+                    </button>
+                  )}
                   <span className="watch-actions">
                     <button
                       className={`toggle-pill${w.brandOnly ? " on" : ""}`}

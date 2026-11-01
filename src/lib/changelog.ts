@@ -14,6 +14,32 @@ export interface Release {
 
 export const RELEASES: Release[] = [
   {
+    version: "1.7",
+    title: "Protein & Bearbeiten",
+    highlights: [
+      {
+        icon: "💪",
+        title: "Neue Kategorie: Protein",
+        text:
+          "Im Suchen-Tab gibt es jetzt den Bereich Protein mit „High Protein“ (alles mit Protein " +
+          "oder Eiweiß, z. B. Pudding, Skyr, Drinks) und „Proteinriegel“. Auch die Suche nach " +
+          "„High Protein“ oder „Eiweiß“ findet jetzt passende Angebote.",
+      },
+      {
+        icon: "✎",
+        title: "Produkte umbenennen",
+        text:
+          "Vertippt? Unter Produkte einfach auf den Namen tippen, ändern und mit „Fertig“ " +
+          "bestätigen. Kein Löschen und neu Anlegen mehr nötig.",
+      },
+      {
+        icon: "🧹",
+        title: "Aufgeräumt",
+        text: "Die Technik-Info in den Einstellungen ist wieder weg.",
+      },
+    ],
+  },
+  {
     version: "1.6",
     revision: 2,
     title: "Wischen & Liquid Glass",

@@ -25,4 +25,11 @@ export const CATEGORY_SECTIONS: { title: string; categories: Category[] }[] = [
       { id: "kekse", label: "Kekse", emoji: "🍪", queries: ["Kekse", "Cookies"] },
     ],
   },
+  {
+    title: "Protein",
+    categories: [
+      { id: "protein", label: "High Protein", emoji: "💪", queries: ["Protein", "Eiweiß"] },
+      { id: "proteinriegel", label: "Proteinriegel", emoji: "🍫", queries: ["Proteinriegel", "Eiweißriegel"] },
+    ],
+  },
 ];
