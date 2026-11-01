@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Offer } from "./types";
 import { groupByTerm, markNew } from "./lib/offers";
 import { fetchOffers } from "./lib/api";
@@ -58,6 +58,10 @@ export default function App() {
   function rememberBrands(offers: Offer[]) {
     setLearnedBrands((prev) => learnBrands(prev, offers));
   }
+
+  // Beim Tab-Wechsel oben anfangen (nur der Inhalt scrollt, nicht die Seite)
+  const contentRef = useRef<HTMLElement>(null);
+  useEffect(() => contentRef.current?.scrollTo({ top: 0 }), [tab]);
 
   useEffect(removeLegacyOffers, []);
   useEffect(() => saveWatchlist(watchlist), [watchlist]);
@@ -135,7 +139,7 @@ export default function App() {
         )}
       </header>
 
-      <main className="content">
+      <main className="content" ref={contentRef}>
         {tab === "offers" && (
           <>
             {!validZip ? (

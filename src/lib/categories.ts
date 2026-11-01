@@ -21,8 +21,8 @@ export const CATEGORY_SECTIONS: { title: string; categories: Category[] }[] = [
     categories: [
       { id: "chips", label: "Chips", emoji: "🥔", queries: ["Chips"] },
       { id: "schokolade", label: "Schokolade", emoji: "🍫", queries: ["Schokolade"] },
-      { id: "fruchtgummi", label: "Fruchtgummi", emoji: "🐻", queries: ["Fruchtgummi"] },
-      { id: "kekse", label: "Kekse", emoji: "🍪", queries: ["Kekse"] },
+      { id: "fruchtgummi", label: "Fruchtgummi", emoji: "🐻", queries: ["Fruchtgummi", "Gummibärchen"] },
+      { id: "kekse", label: "Kekse", emoji: "🍪", queries: ["Kekse", "Cookies"] },
     ],
   },
 ];

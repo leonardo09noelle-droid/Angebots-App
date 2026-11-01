@@ -1,5 +1,5 @@
 /** Aktuelle Version. Bei jedem Update erhöhen und oben in RELEASES einen Eintrag ergänzen. */
-export const APP_VERSION = "1.4";
+export const APP_VERSION = "1.5";
 
 export interface Release {
   version: string;
@@ -9,6 +9,27 @@ export interface Release {
 }
 
 export const RELEASES: Release[] = [
+  {
+    version: "1.5",
+    title: "Neues Design & schlauere Suche",
+    highlights: [
+      {
+        icon: "🍬",
+        title: "Suche versteht mehr Wörter",
+        text: "„Gummibärchen“ findet jetzt auch Fruchtgummi, „Limo“ auch Limonade, „Sprudel“ auch Mineralwasser.",
+      },
+      {
+        icon: "📱",
+        title: "Neue Tab-Leiste",
+        text: "Abgerundet und schwebend, und kein dunkler Streifen mehr beim Öffnen.",
+      },
+      {
+        icon: "🐻",
+        title: "Mehr in den Kategorien",
+        text: "Fruchtgummi zeigt auch Gummibärchen, Kekse auch Cookies.",
+      },
+    ],
+  },
   {
     version: "1.4",
     title: "Intelligente Suche",

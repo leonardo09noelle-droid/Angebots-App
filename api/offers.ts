@@ -6,7 +6,8 @@ import { normalizeResults } from "../server/normalize.js";
 // GET /api/offers?zip=10115&q=Monster%20Energy,Proteinriegel
 // Läuft auf Vercel als Serverless-Funktion und lokal über die Middleware in vite.config.ts.
 
-const MAX_TERMS = 15;
+// Merkliste plus Synonyme (bis zu 3 Suchen pro Produkt)
+const MAX_TERMS = 30;
 
 function json(body: unknown, status: number, cache = false): Response {
   return new Response(JSON.stringify(body), {
