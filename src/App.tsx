@@ -27,6 +27,8 @@ import { MyProducts } from "./components/MyProducts";
 import { Search } from "./components/Search";
 import { Settings } from "./components/Settings";
 import { WhatsNew } from "./components/WhatsNew";
+import { TabBar } from "./components/TabBar";
+import { useSwipeTabs } from "./lib/useSwipeTabs";
 
 type Tab = "offers" | "search" | "products" | "settings";
 
@@ -61,12 +63,30 @@ export default function App() {
 
   // Beim Tab-Wechsel oben anfangen (nur der Inhalt scrollt, nicht die Seite)
   const contentRef = useRef<HTMLElement>(null);
-  useEffect(() => contentRef.current?.scrollTo({ top: 0 }), [tab]);
+  // Geschweifte Klammern sind wichtig: scrollTo gibt in neuerem Chrome ein Promise zurück, und
+  // React würde den Rückgabewert sonst als Aufräum-Funktion aufrufen (Absturz beim Tab-Wechsel)
+  useEffect(() => {
+    contentRef.current?.scrollTo({ top: 0 });
+  }, [tab]);
 
-  useEffect(removeLegacyOffers, []);
-  useEffect(() => saveWatchlist(watchlist), [watchlist]);
-  useEffect(() => saveZip(zip), [zip]);
-  useEffect(() => saveMarkets(markets), [markets]);
+  // Wischen im Inhalt: nach links = nächster Tab, nach rechts = vorheriger
+  const swipe = useSwipeTabs((direction) => {
+    const next = TABS.findIndex((t) => t.id === tab) + direction;
+    if (next >= 0 && next < TABS.length) setTab(TABS[next].id);
+  });
+
+  useEffect(() => {
+    removeLegacyOffers();
+  }, []);
+  useEffect(() => {
+    saveWatchlist(watchlist);
+  }, [watchlist]);
+  useEffect(() => {
+    saveZip(zip);
+  }, [zip]);
+  useEffect(() => {
+    saveMarkets(markets);
+  }, [markets]);
 
   const validZip = /^\d{5}$/.test(zip);
   const termsKey = watchlist.map((w) => w.term).join(",");
@@ -139,7 +159,7 @@ export default function App() {
         )}
       </header>
 
-      <main className="content" ref={contentRef}>
+      <main className="content" ref={contentRef} {...swipe}>
         {tab === "offers" && (
           <>
             {!validZip ? (
@@ -210,21 +230,7 @@ export default function App() {
 
       {missedReleases.length > 0 && <WhatsNew releases={missedReleases} onClose={closeWhatsNew} />}
 
-      <nav className="tabbar">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            className={t.id === tab ? "active" : ""}
-            onClick={() => setTab(t.id)}
-            aria-current={t.id === tab ? "page" : undefined}
-          >
-            <span className="tab-icon" aria-hidden>
-              {t.icon}
-            </span>
-            {t.label}
-          </button>
-        ))}
-      </nav>
+      <TabBar tabs={TABS} active={tab} onChange={setTab} />
     </div>
   );
 }

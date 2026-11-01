@@ -20,12 +20,12 @@ const versions = (seen: string[]) => unseenReleases(seen).map((r) => r.version);
 describe("unseenReleases", () => {
   it("zeigt alle verpassten Versionen, neueste zuerst", () => {
     expect(versions([])).toEqual(RELEASES.map((r) => r.version));
-    expect(versions(["1.4"])).toEqual(["1.5"]);
-    expect(versions(["1.4", "1.5"])).toEqual([]);
+    expect(versions(["1.4", "1.5"])).toEqual(["1.6"]);
+    expect(versions(["1.4", "1.5", "1.6"])).toEqual([]);
   });
 
-  it("zeigt 1.4 auch dann noch, wenn nur 1.5 weggeklickt wurde", () => {
-    expect(versions(["1.5"])).toEqual(["1.4"]);
+  it("zeigt 1.4 auch dann noch, wenn nur neuere weggeklickt wurden", () => {
+    expect(versions(["1.5", "1.6"])).toEqual(["1.4"]);
   });
 });
 

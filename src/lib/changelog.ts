@@ -11,6 +11,32 @@ export interface Release {
 
 export const RELEASES: Release[] = [
   {
+    version: "1.6",
+    title: "Wischen & Liquid Glass",
+    highlights: [
+      {
+        icon: "👆",
+        title: "Zwischen Tabs wischen",
+        text:
+          "Wisch auf dem Bildschirm einfach nach links oder rechts, um zum nächsten Tab zu kommen, " +
+          "z. B. von Suchen zu Produkte. Oder leg den Finger auf die Leiste unten und zieh ihn " +
+          "zum Tab, den du willst: Die Glas-Blase folgt deinem Finger.",
+      },
+      {
+        icon: "🫧",
+        title: "Liquid-Glass-Leiste",
+        text: "Die Tab-Leiste ist jetzt aus „Glas“: durchscheinend, mit Glanzkante und einer Blase, die zum Tab gleitet.",
+      },
+      {
+        icon: "📐",
+        title: "Bis an den Rand",
+        text:
+          "Die App nutzt jetzt den ganzen Bildschirm, unten bleibt kein farbiger Streifen mehr frei. " +
+          "Oben ist die Kopfzeile klarer, die Postleitzahl ist besser lesbar.",
+      },
+    ],
+  },
+  {
     version: "1.5",
     title: "Neues Design & schlauere Suche",
     highlights: [

@@ -11,6 +11,11 @@
   --best: #fbbf24;
   --danger: #b91c1c;
   --radius: 14px;
+  /* Liquid Glass */
+  --glass-bg: rgb(255 255 255 / 0.55);
+  --glass-border: rgb(255 255 255 / 0.75);
+  --glass-shine: rgb(255 255 255 / 0.9);
+  --bubble-bg: rgb(15 118 110 / 0.12);
   color-scheme: light dark;
 }
 
@@ -26,6 +31,10 @@
     --deal: #fdba74;
     --deal-bg: #431b07;
     --danger: #f87171;
+    --glass-bg: rgb(28 38 36 / 0.5);
+    --glass-border: rgb(255 255 255 / 0.12);
+    --glass-shine: rgb(255 255 255 / 0.2);
+    --bubble-bg: rgb(255 255 255 / 0.1);
   }
 }
 
@@ -86,12 +95,27 @@ select:focus {
   flex-direction: column;
 }
 
+/*
+ * Als installierte App gibt das iPhone der Seite beim Start manchmal nicht die volle Höhe;
+ * unten blieb dann ~1 cm der Startbildschirm-Farbe sichtbar. Darum hier ausdrücklich den ganzen
+ * Bildschirm belegen ("lvh" = volle Höhe; im Browser mit Adressleiste wäre das zu hoch).
+ */
+@media (display-mode: standalone) {
+  .app {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100lvh;
+  }
+}
+
 .app-header {
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: calc(env(safe-area-inset-top) + 12px) max(16px, calc((100% - 640px) / 2)) 10px;
+  padding: calc(env(safe-area-inset-top) + 18px) max(16px, calc((100% - 640px) / 2)) 10px;
   background: var(--bg);
 }
 
@@ -103,7 +127,8 @@ select:focus {
 
 .zip-chip {
   font-size: 13px;
-  color: var(--muted);
+  font-weight: 600;
+  color: var(--text);
   background: var(--surface);
   border: 1px solid var(--border);
   padding: 4px 10px;
@@ -1063,8 +1088,8 @@ select:focus {
 }
 
 /*
- * Schwebende, abgerundete Tab-Leiste über dem Inhalt. Sitzt direkt über dem Home-Balken
- * (wie bei aktuellen iPhone-Apps), statt den ganzen Sicherheitsabstand frei zu lassen.
+ * Schwebende Tab-Leiste im Liquid-Glass-Look, direkt über dem Home-Balken.
+ * Die Glas-Blase (.tab-bubble) wird in TabBar.tsx positioniert und folgt beim Ziehen dem Finger.
  */
 .tabbar {
   position: absolute;
@@ -1077,34 +1102,57 @@ select:focus {
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
-  padding: 6px;
-  background: color-mix(in srgb, var(--surface) 88%, transparent);
-  backdrop-filter: blur(16px) saturate(1.4);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
-  border: 1px solid var(--border);
-  border-radius: 28px;
-  box-shadow: 0 8px 28px rgb(0 0 0 / 0.18);
+  padding: 6px; /* muss zu PADDING in TabBar.tsx passen */
+  background: var(--glass-bg);
+  backdrop-filter: blur(22px) saturate(1.9);
+  -webkit-backdrop-filter: blur(22px) saturate(1.9);
+  border: 1px solid var(--glass-border);
+  border-radius: 30px;
+  box-shadow:
+    inset 0 1px 0 var(--glass-shine),
+    inset 0 -1px 0 rgb(0 0 0 / 0.12),
+    0 10px 30px rgb(0 0 0 / 0.22);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.tab-bubble {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 0;
+  border-radius: 24px;
+  background: var(--bubble-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 var(--glass-shine);
+  transition: transform 0.38s cubic-bezier(0.3, 1.4, 0.5, 1);
+  pointer-events: none;
+}
+
+/* Beim Ziehen: Blase folgt sofort dem Finger und wird etwas größer, wie ein Tropfen */
+.tabbar.dragging .tab-bubble {
+  transition: none;
+  scale: 1.08;
 }
 
 .tabbar button {
+  position: relative;
   display: grid;
   justify-items: center;
   gap: 2px;
   border: 0;
-  border-radius: 22px;
   background: none;
   padding: 7px 0 6px;
   font-size: 11px;
   font-weight: 600;
   color: var(--muted);
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: color 0.15s;
 }
 
 .tabbar button.active {
   color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
 }
 
 .tab-icon {

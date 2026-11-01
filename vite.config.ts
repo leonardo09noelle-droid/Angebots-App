@@ -38,7 +38,8 @@ export default defineConfig({
         description: "Aktuelle Supermarkt-Angebote für deine Lieblingsprodukte",
         lang: "de",
         theme_color: "#0f766e",
-        background_color: "#0f766e",
+        // dunkel wie die App, damit ein kurzer Startbildschirm oder Rand nicht türkis aufblitzt
+        background_color: "#0d1211",
         display: "standalone",
         start_url: "/",
         icons: [
