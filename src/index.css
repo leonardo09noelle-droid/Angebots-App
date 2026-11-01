@@ -118,7 +118,7 @@ select:focus {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  padding: 4px max(16px, calc((100% - 640px) / 2)) calc(env(safe-area-inset-bottom) + 84px);
+  padding: 4px max(16px, calc((100% - 640px) / 2)) calc(env(safe-area-inset-bottom) + 72px);
 }
 
 .content::-webkit-scrollbar {
@@ -1070,7 +1070,8 @@ select:focus {
   position: absolute;
   left: 12px;
   right: 12px;
-  bottom: max(10px, calc(env(safe-area-inset-bottom) - 14px));
+  /* iPhone: Sicherheitsabstand ~34px, Leiste sitzt damit ~8px über der Unterkante */
+  bottom: max(8px, calc(env(safe-area-inset-bottom) - 26px));
   z-index: 10;
   max-width: 480px;
   margin: 0 auto;

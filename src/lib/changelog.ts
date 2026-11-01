@@ -26,8 +26,8 @@ export const RELEASES: Release[] = [
         icon: "📱",
         title: "Neue Tab-Leiste",
         text:
-          "Die Leiste unten ist jetzt abgerundet, schwebt über dem Inhalt und sitzt direkt über dem " +
-          "Home-Balken. Der dunkle Streifen beim Öffnen der App ist weg, und beim Wechseln der Tabs " +
+          "Die Leiste unten ist jetzt abgerundet, schwebt über dem Inhalt und sitzt ganz unten am " +
+          "Bildschirmrand. Der dunkle Streifen beim Öffnen der App ist weg, und beim Wechseln der Tabs " +
           "startest du immer oben.",
       },
       {
