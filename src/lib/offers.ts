@@ -1,4 +1,6 @@
-import type { Market, Offer } from "../types";
+import type { Market, Offer, WatchItem } from "../types";
+// .js-Endung nötig: diese Datei lädt auch der Server auf Vercel als ES-Modul
+import { normalize } from "./fuzzy.js";
 
 export interface OfferGroup {
   term: string;
@@ -147,15 +149,37 @@ export function discountPercent(offer: Offer): number | undefined {
 }
 
 /**
- * Gültige Angebote pro Merklisten-Eintrag, in Merklisten-Reihenfolge.
- * Was heute schon gilt, kommt vor kommenden Angeboten, jeweils günstigstes zuerst.
+ * Gehört das Angebot zur Marke? Normalisiert verglichen, und der Anfang reicht:
+ * "Monster" passt auf "Monster Energy", aber nicht auf "Covo" (Monster Mampf).
  */
-export function groupByTerm(offers: Offer[], watchlist: string[], today = todayISO()): OfferGroup[] {
-  return watchlist.map((term) => ({
+export function matchesBrand(offer: Offer, term: string): boolean {
+  const brand = normalize(offer.brand ?? "");
+  const t = normalize(term);
+  return !!brand && !!t && (brand.startsWith(t) || t.startsWith(brand));
+}
+
+/** Nur gültige Angebote; was heute schon gilt vor kommenden, jeweils günstigstes zuerst */
+export function sortOffers(offers: Offer[], today = todayISO()): Offer[] {
+  return offers
+    .filter((o) => isActive(o, today))
+    .sort((a, b) => Number(isUpcoming(a, today)) - Number(isUpcoming(b, today)) || a.price - b.price);
+}
+
+/** Ergebnisse mehrerer Suchbegriffe zusammenführen (dasselbe Angebot kann bei "Cola" und "Limonade" auftauchen) */
+export function mergeById(offers: Offer[]): Offer[] {
+  const byId = new Map<string, Offer>();
+  for (const offer of offers) if (!byId.has(offer.id)) byId.set(offer.id, offer);
+  return [...byId.values()];
+}
+
+/** Gültige Angebote pro Merklisten-Eintrag, in Merklisten-Reihenfolge; bei brandOnly nur diese Marke */
+export function groupByTerm(offers: Offer[], watchlist: WatchItem[], today = todayISO()): OfferGroup[] {
+  return watchlist.map(({ term, brandOnly }) => ({
     term,
-    offers: offers
-      .filter((o) => o.term.toLowerCase() === term.toLowerCase() && isActive(o, today))
-      .sort((a, b) => Number(isUpcoming(a, today)) - Number(isUpcoming(b, today)) || a.price - b.price),
+    offers: sortOffers(
+      offers.filter((o) => o.term.toLowerCase() === term.toLowerCase() && (!brandOnly || matchesBrand(o, term))),
+      today,
+    ),
   }));
 }
 

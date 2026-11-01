@@ -10,6 +10,12 @@ export const MARKETS = [
 
 export type Market = (typeof MARKETS)[number];
 
+/** Eintrag auf der Merkliste. brandOnly: nur Angebote genau dieser Marke ("Pringles", nicht alle Chips) */
+export interface WatchItem {
+  term: string;
+  brandOnly: boolean;
+}
+
 export interface Offer {
   id: string;
   /** Merklisten-Eintrag, zu dem das Angebot gehört (z. B. "Monster Energy") */

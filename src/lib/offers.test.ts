@@ -7,6 +7,8 @@ import {
   fullName,
   groupByBrand,
   groupByTerm,
+  matchesBrand,
+  mergeById,
   isActive,
   isLastDay,
   loyaltyLabel,
@@ -24,6 +26,9 @@ const offer = (o: Partial<Offer>): Offer => ({
   source: "manual",
   ...o,
 });
+
+/** Merklisten-Eintrag ohne Marken-Filter */
+const all = (term: string) => ({ term, brandOnly: false });
 
 describe("todayISO", () => {
   it("formatiert in lokaler Zeit mit führenden Nullen", () => {
@@ -63,7 +68,7 @@ describe("groupByTerm", () => {
   ];
 
   it("sortiert nach Preis, blendet Abgelaufenes aus, behält die Merklisten-Reihenfolge", () => {
-    const groups = groupByTerm(offers, ["Proteinriegel", "Monster Energy", "Pringles"], today);
+    const groups = groupByTerm(offers, [all("Proteinriegel"), all("Monster Energy"), all("Pringles")], today);
     expect(groups.map((g) => g.term)).toEqual(["Proteinriegel", "Monster Energy", "Pringles"]);
     expect(groups[0].offers.map((o) => o.id)).toEqual(["d"]);
     expect(groups[1].offers.map((o) => o.id)).toEqual(["b", "a"]);
@@ -73,10 +78,38 @@ describe("groupByTerm", () => {
   it("stellt kommende Angebote hinter die heute gültigen, auch wenn sie billiger sind", () => {
     const groups = groupByTerm(
       [offer({ id: "next", price: 0.79, validFrom: "2026-11-02" }), offer({ id: "now", price: 0.99 })],
-      ["Monster Energy"],
+      [all("Monster Energy")],
       today,
     );
     expect(groups[0].offers.map((o) => o.id)).toEqual(["now", "next"]);
+  });
+
+  it("zeigt bei 'Nur Marke' nur Angebote dieser Marke", () => {
+    const monster = [
+      offer({ id: "me", term: "Monster", brand: "Monster Energy", product: "Energy Drink" }),
+      offer({ id: "mampf", term: "Monster", brand: "Covo", product: "Monster Mampf Mini" }),
+    ];
+    expect(groupByTerm(monster, [{ term: "Monster", brandOnly: true }], today)[0].offers.map((o) => o.id)).toEqual([
+      "me",
+    ]);
+    expect(groupByTerm(monster, [all("Monster")], today)[0].offers).toHaveLength(2);
+  });
+});
+
+describe("matchesBrand", () => {
+  it("vergleicht Marken großzügig, aber genau genug", () => {
+    expect(matchesBrand(offer({ brand: "Pringles" }), "pringles")).toBe(true);
+    expect(matchesBrand(offer({ brand: "Monster Energy" }), "Monster")).toBe(true);
+    expect(matchesBrand(offer({ brand: "Lay's" }), "Lays")).toBe(true);
+    expect(matchesBrand(offer({ brand: "funny-frisch" }), "Pringles")).toBe(false);
+    expect(matchesBrand(offer({}), "Pringles")).toBe(false);
+  });
+});
+
+describe("mergeById", () => {
+  it("führt Ergebnisse mehrerer Suchbegriffe zusammen", () => {
+    const merged = mergeById([offer({ id: "a" }), offer({ id: "b" }), offer({ id: "a", term: "Limonade" })]);
+    expect(merged.map((o) => o.id)).toEqual(["a", "b"]);
   });
 });
 

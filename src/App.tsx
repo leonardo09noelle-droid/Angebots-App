@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
+import type { Offer } from "./types";
 import { groupByTerm, markNew } from "./lib/offers";
 import { fetchOffers } from "./lib/api";
+import { allBrands } from "./lib/brands";
 import {
+  learnBrands,
+  loadLearnedBrands,
   loadMarkets,
   loadRemote,
   loadSeen,
@@ -41,6 +45,13 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [reloadToken, setReloadToken] = useState(0);
+  const [learnedBrands, setLearnedBrands] = useState(loadLearnedBrands);
+  const brands = useMemo(() => allBrands(learnedBrands), [learnedBrands]);
+
+  /** Marken aus Ergebnissen merken, für Vorschläge und "Meintest du …?" */
+  function rememberBrands(offers: Offer[]) {
+    setLearnedBrands((prev) => learnBrands(prev, offers));
+  }
 
   useEffect(removeLegacyOffers, []);
   useEffect(() => saveWatchlist(watchlist), [watchlist]);
@@ -48,7 +59,7 @@ export default function App() {
   useEffect(() => saveMarkets(markets), [markets]);
 
   const validZip = /^\d{5}$/.test(zip);
-  const termsKey = watchlist.join(",");
+  const termsKey = watchlist.map((w) => w.term).join(",");
 
   // Automatische Suche: beim Start, bei neuer PLZ/Merkliste und per Aktualisieren-Knopf
   useEffect(() => {
@@ -61,6 +72,7 @@ export default function App() {
         const cache = { zip, fetchedAt: Date.now(), offers: result.offers };
         setRemote(cache);
         saveRemote(cache);
+        rememberBrands(result.offers);
 
         // "Neu" bleibt für diese Sitzung stehen, auch nach erneutem Aktualisieren
         const ids = result.offers.map((o) => o.id);
@@ -87,8 +99,10 @@ export default function App() {
   const groups = useMemo(() => groupByTerm(visibleOffers, watchlist), [visibleOffers, watchlist]);
   const offerCounts = useMemo(() => new Map(groups.map((g) => [g.term, g.offers.length])), [groups]);
 
-  function addTerm(term: string) {
-    setWatchlist((prev) => (prev.some((w) => w.toLowerCase() === term.toLowerCase()) ? prev : [...prev, term]));
+  function addItem(term: string, brandOnly: boolean) {
+    setWatchlist((prev) =>
+      prev.some((w) => w.term.toLowerCase() === term.toLowerCase()) ? prev : [...prev, { term, brandOnly }],
+    );
   }
 
   return (
@@ -154,10 +168,24 @@ export default function App() {
           </>
         )}
 
-        {tab === "search" && <Search zip={zip} markets={markets} watchlist={watchlist} onAddTerm={addTerm} />}
+        {tab === "search" && (
+          <Search
+            zip={zip}
+            markets={markets}
+            watchlist={watchlist}
+            brands={brands}
+            onAddItem={addItem}
+            onResults={rememberBrands}
+          />
+        )}
 
         {tab === "products" && (
-          <MyProducts watchlist={watchlist} onWatchlistChange={setWatchlist} offerCounts={offerCounts} />
+          <MyProducts
+            watchlist={watchlist}
+            onWatchlistChange={setWatchlist}
+            offerCounts={offerCounts}
+            brands={brands}
+          />
         )}
 
         {tab === "settings" && (

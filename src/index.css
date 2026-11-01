@@ -547,9 +547,148 @@ select:focus {
   cursor: pointer;
 }
 
-.chip:active {
+.chip:active,
+.chip.active {
   border-color: var(--accent);
   color: var(--accent);
+}
+
+.chip.active {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.watch-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.toggle-pill {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.toggle-pill.on {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Suche */
+.search-form {
+  margin-bottom: 0;
+}
+
+.suggest-list {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.suggest-item {
+  display: block;
+  width: 100%;
+  padding: 10px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--text);
+  font-size: 15px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.suggest-item:active {
+  background: var(--bg);
+}
+
+.results-head {
+  margin: 14px 0 4px;
+}
+
+.back-btn,
+.link-btn {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.link-btn {
+  font-size: inherit;
+  text-decoration: underline;
+}
+
+.correction {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.brand-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin: 0 -16px 12px;
+  padding: 2px 16px;
+  scrollbar-width: none;
+}
+
+.brand-chips .chip {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.categories {
+  margin-top: 16px;
+}
+
+.cat-title {
+  margin: 18px 0 10px;
+  font-size: 18px;
+}
+
+.cat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.cat-tile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 64px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cat-tile:active {
+  border-color: var(--accent);
+}
+
+.cat-emoji {
+  font-size: 26px;
 }
 
 .market-grid {

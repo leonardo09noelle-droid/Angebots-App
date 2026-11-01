@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { loadMarkets, removeLegacyOffers } from "./storage";
+import type { Offer } from "../types";
+import { learnBrands, loadMarkets, loadWatchlist, parseWatchlist, removeLegacyOffers } from "./storage";
 
 // Kleiner localStorage-Ersatz für die Tests (Node hat keinen)
 const store = new Map<string, string>();
@@ -22,6 +23,37 @@ describe("loadMarkets", () => {
   it("wirft alte, gespeicherte Kaufland-Auswahl still heraus", () => {
     store.set("angebote.markets", JSON.stringify(["Lidl", "Kaufland", "Rewe"]));
     expect(loadMarkets()).toEqual(["Lidl", "Rewe"]);
+  });
+});
+
+describe("Merkliste", () => {
+  it("wandelt das alte Format (nur Texte) um und schaltet bei Marken 'Nur Marke' an", () => {
+    store.set("angebote.watchlist", JSON.stringify(["Monster Energy", "Proteinriegel"]));
+    expect(loadWatchlist()).toEqual([
+      { term: "Monster Energy", brandOnly: true },
+      { term: "Proteinriegel", brandOnly: false },
+    ]);
+  });
+
+  it("liest das neue Format unverändert und ignoriert Kaputtes", () => {
+    expect(parseWatchlist([{ term: "Pringles", brandOnly: false }, 42, "", { foo: 1 }])).toEqual([
+      { term: "Pringles", brandOnly: false },
+    ]);
+  });
+
+  it("startet mit Monster Energy (Marke) und Proteinriegel", () => {
+    expect(loadWatchlist()).toEqual([
+      { term: "Monster Energy", brandOnly: true },
+      { term: "Proteinriegel", brandOnly: false },
+    ]);
+  });
+});
+
+describe("learnBrands", () => {
+  it("merkt sich neue Marken ohne Dubletten", () => {
+    const offers = [{ brand: "Pringles" }, { brand: "pringles" }, { brand: "Lay's" }, {}] as Offer[];
+    expect(learnBrands(["Lay's"], offers)).toEqual(["Pringles", "Lay's"]);
+    expect(learnBrands(["Pringles", "Lay's"], offers)).toEqual(["Pringles", "Lay's"]);
   });
 });
 
