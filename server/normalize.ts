@@ -60,6 +60,18 @@ function depositOf(description: string | null | undefined): number | undefined {
   return value > 0 && value < 10 ? value : undefined;
 }
 
+/**
+ * Normalpreis: direkt von marktguru, sonst aus dem Prospekttext
+ * ("statt 1,49", "UVP 1,79", "bisher 2.29 €", "Normalpreis: 1,99"). Nur wenn er über dem Angebotspreis liegt.
+ */
+function oldPriceOf(raw: RawOffer, price: number): number | undefined {
+  const match = raw.description?.match(
+    /(?:statt|uvp|bisher|vorher|regulär|normalpreis)\s*:?\s*(?:€\s*)?(\d+[.,]\d{1,2})/i,
+  );
+  const candidate = raw.oldPrice ?? (match ? Number(match[1].replace(",", ".")) : undefined);
+  return candidate !== undefined && candidate > price ? candidate : undefined;
+}
+
 /** Nur echte Web-Links übernehmen */
 function safeUrl(url: string | null | undefined): string | undefined {
   return url && /^https:\/\//i.test(url) ? url : undefined;
@@ -87,7 +99,7 @@ export function normalizeOffer(raw: RawOffer, term: string): Offer | undefined {
     product: raw.product?.name?.trim() || raw.brand?.name?.trim() || term,
     brand: raw.brand?.name?.trim() || undefined,
     price: raw.price,
-    oldPrice: raw.oldPrice ?? undefined,
+    oldPrice: oldPriceOf(raw, raw.price),
     market,
     validFrom: toBerlinDay(validity?.from),
     validUntil: toBerlinDay(validity?.to),

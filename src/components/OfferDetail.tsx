@@ -18,7 +18,6 @@ interface Props {
   offer: Offer;
   cheapest: boolean;
   onClose: () => void;
-  onRemove?: (id: string) => void;
 }
 
 /** marktguru-Bilder gibt es in mehreren Größen; erst groß, dann klein, dann keins */
@@ -37,7 +36,7 @@ function validityText(offer: Offer): string | undefined {
 }
 
 /** Detailansicht als Blatt von unten (wie bei iOS) */
-export function OfferDetail({ offer, cheapest, onClose, onRemove }: Props) {
+export function OfferDetail({ offer, cheapest, onClose }: Props) {
   const images = imageCandidates(offer.imageUrl);
   const [imageIndex, setImageIndex] = useState(0);
   const { share, feedback } = useShare(offer);
@@ -115,6 +114,16 @@ export function OfferDetail({ offer, cheapest, onClose, onRemove }: Props) {
               {cheapest && <span className="best">Günstigster</span>}
             </dd>
           </div>
+          <div>
+            <dt>Normalpreis</dt>
+            {offer.oldPrice !== undefined && discount !== undefined ? (
+              <dd>
+                {formatPrice(offer.oldPrice)} · du sparst {formatPrice(offer.oldPrice - offer.price)} (−{discount} %)
+              </dd>
+            ) : (
+              <dd className="text-muted">nicht im Prospekt angegeben</dd>
+            )}
+          </div>
           {validity && (
             <div>
               <dt>Gültig</dt>
@@ -178,14 +187,6 @@ export function OfferDetail({ offer, cheapest, onClose, onRemove }: Props) {
             <a className="secondary big" href={offer.externalUrl} target="_blank" rel="noopener noreferrer">
               Beim Markt ansehen ↗
             </a>
-          )}
-          {offer.source === "manual" && onRemove && (
-            <button
-              className="danger big"
-              onClick={() => confirm(`„${offer.product}“ bei ${offer.market} löschen?`) && onRemove(offer.id)}
-            >
-              Löschen
-            </button>
           )}
         </div>
       </div>

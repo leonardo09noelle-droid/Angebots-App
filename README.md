@@ -52,7 +52,7 @@ Android/Samsung: Adresse in Chrome öffnen → Menü ⋮ → **App installieren*
 ## Woher die Angebote kommen
 
 - **Automatisch:** Die Funktion `api/offers.ts` fragt marktguru für jedes Produkt auf deiner Merkliste
-  und deine Postleitzahl ab. Sie behält nur Lidl, Aldi Nord/Süd, Penny, Netto, Rewe, Edeka und Kaufland
+  und deine Postleitzahl ab. Sie behält nur Lidl, Aldi Nord/Süd, Penny, Netto, Rewe und Edeka
   (`server/retailers.ts`) und nur Treffer, die alle Wörter des Merklisten-Eintrags enthalten
   (`server/normalize.ts`). Auf Vercel wird das Ergebnis eine Stunde zwischengespeichert.
 - **Selbst eingetragen:** über den Tab „Eintragen“, für alles, was marktguru nicht kennt.

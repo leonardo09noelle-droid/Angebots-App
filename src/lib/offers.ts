@@ -129,7 +129,6 @@ const LOYALTY_APP: Record<Market, string> = {
   Netto: "Netto-App",
   Rewe: "REWE-App",
   Edeka: "EDEKA-App",
-  Kaufland: "Kaufland Card",
 };
 
 export function loyaltyApp(offer: Offer): string {

@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" fill="#0f766e"/>
-  <g transform="translate(256 256) scale(1.3) translate(-256 -256)">
-  <!-- Preisschild -->
-  <path d="M120 150 L280 150 L392 256 L280 362 L120 362 Z" fill="#fbbf24" stroke="#fde68a" stroke-width="10" stroke-linejoin="round" transform="rotate(-12 256 256)"/>
-  <circle cx="300" cy="256" r="18" fill="#0f766e" transform="rotate(-12 256 256)"/>
-  <!-- Prozentzeichen -->
-  <g transform="rotate(-12 256 256)" fill="#0f766e">
-    <circle cx="170" cy="215" r="24"/>
-    <circle cx="232" cy="297" r="24"/>
-    <rect x="190" y="180" width="18" height="150" rx="9" transform="rotate(35 199 255)"/>
-  </g>
+  <!-- Motiv auf 85 % verkleinert, damit es auch in runden Android-Icons ganz sichtbar bleibt -->
+  <g transform="translate(256 256) scale(0.85) translate(-258 -243)">
+    <!-- Einkaufswagen -->
+    <path d="M85 115 L141 115 L188 302 L393 302 L431 174 L158 174" fill="none" stroke="#ffffff" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="213" cy="371" r="26" fill="#ffffff"/>
+    <circle cx="371" cy="371" r="26" fill="#ffffff"/>
+    <!-- Prozentzeichen -->
+    <circle cx="252" cy="213" r="17" fill="#fbbf24"/>
+    <circle cx="341" cy="264" r="17" fill="#fbbf24"/>
+    <path d="M363 204 L230 272" stroke="#fbbf24" stroke-width="17" stroke-linecap="round"/>
   </g>
 </svg>

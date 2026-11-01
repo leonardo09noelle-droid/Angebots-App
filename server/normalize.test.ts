@@ -40,9 +40,31 @@ describe("normalizeResults", () => {
     expect(offers[0].deposit).toBe(0.25);
   });
 
+  it("liest den Normalpreis aus dem Prospekttext, wenn marktguru keinen liefert", () => {
+    const base = results.find((r) => r.product?.name === "Energy Drink")!; // 0,99 €
+    const withText = (description: string) =>
+      normalizeResults([{ ...base, description }], "Monster Energy")[0].oldPrice;
+    expect(withText("je 0,5-l-Dose, statt 1,49")).toBe(1.49);
+    expect(withText("UVP 1.79 €")).toBe(1.79);
+    expect(withText("Normalpreis: 1,59")).toBe(1.59);
+    expect(withText("versch. Sorten")).toBeUndefined();
+    // niedriger als der Angebotspreis: kein Normalpreis
+    expect(withText("statt 0,89")).toBeUndefined();
+    // direkt von marktguru hat Vorrang
+    expect(normalizeResults([{ ...base, oldPrice: 1.39, description: "statt 1,49" }], "Monster Energy")[0].oldPrice).toBe(
+      1.39,
+    );
+  });
+
+  it("verwirft Kaufland-Angebote", () => {
+    expect(normalizeResults(results, "Mon Chéri")).toHaveLength(0);
+  });
+
   it("übernimmt den Link zum Markt, falls vorhanden", () => {
-    const [offer] = normalizeResults(results, "Mon Chéri");
-    expect(offer).toMatchObject({ market: "Kaufland", product: "Mon Chéri Pralines", brand: "Ferrero" });
+    // Das Kaufland-Angebot aus den Testdaten, umgehängt auf EDEKA
+    const monCheri = results.find((r) => r.product?.name === "Mon Chéri Pralines")!;
+    const [offer] = normalizeResults([{ ...monCheri, advertisers: [{ name: "EDEKA" }] }], "Mon Chéri");
+    expect(offer).toMatchObject({ market: "Edeka", product: "Mon Chéri Pralines", brand: "Ferrero" });
     expect(offer.externalUrl).toMatch(/^https:\/\/filiale\.kaufland\.de\//);
     expect(offer.deposit).toBeUndefined();
   });
@@ -76,6 +98,7 @@ describe("matchMarket", () => {
     expect(matchMarket("Netto Marken-Discount")).toBe("Netto");
     expect(matchMarket("EDEKA Center")).toBe("Edeka");
     expect(matchMarket("nahkauf")).toBeUndefined();
+    expect(matchMarket("Kaufland")).toBeUndefined();
     expect(matchMarket("toom Baumarkt")).toBeUndefined();
   });
 });

@@ -8,11 +8,10 @@ interface Props {
   /** Angebote eines Merklisten-Eintrags, schon sortiert (siehe groupByTerm) */
   offers: Offer[];
   newIds?: Set<string>;
-  onRemove?: (id: string) => void;
 }
 
 /** Angebote nach Marke gruppiert; "Günstigster" gibt es nur innerhalb einer Marke. Antippen öffnet die Details. */
-export function OfferList({ offers, newIds, onRemove }: Props) {
+export function OfferList({ offers, newIds }: Props) {
   const [openId, setOpenId] = useState<string | null>(null);
   const groups = groupByBrand(offers);
   const showBrands = groups.length > 1;
@@ -44,13 +43,6 @@ export function OfferList({ offers, newIds, onRemove }: Props) {
           offer={openOffer}
           cheapest={openOffer.id === openGroup?.cheapestId}
           onClose={() => setOpenId(null)}
-          onRemove={
-            onRemove &&
-            ((id) => {
-              setOpenId(null);
-              onRemove(id);
-            })
-          }
         />
       )}
     </div>

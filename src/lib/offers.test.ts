@@ -100,7 +100,7 @@ describe("cheapestId", () => {
   it("vergleicht über den Grundpreis, wenn alle einen haben", () => {
     const offers = [
       offer({ id: "dose", price: 0.99, referencePrice: 1.98, referenceUnit: "l" }),
-      offer({ id: "pack", price: 9.99, referencePrice: 1.67, referenceUnit: "l", market: "Kaufland" }),
+      offer({ id: "pack", price: 9.99, referencePrice: 1.67, referenceUnit: "l", market: "Edeka" }),
     ];
     expect(cheapestId(offers, today)).toBe("pack");
   });

@@ -1,16 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
-import type { Offer } from "./types";
 import { groupByTerm, markNew } from "./lib/offers";
 import { fetchOffers } from "./lib/api";
 import {
   loadMarkets,
-  loadOffers,
   loadRemote,
   loadSeen,
   loadWatchlist,
   loadZip,
+  removeLegacyOffers,
   saveMarkets,
-  saveOffers,
   saveRemote,
   saveSeen,
   saveWatchlist,
@@ -18,17 +16,17 @@ import {
   type RemoteCache,
 } from "./lib/storage";
 import { OfferList } from "./components/OfferList";
-import { AddOffer } from "./components/AddOffer";
+import { MyProducts } from "./components/MyProducts";
 import { Search } from "./components/Search";
 import { Settings } from "./components/Settings";
 
-type Tab = "offers" | "search" | "add" | "settings";
+type Tab = "offers" | "search" | "products" | "settings";
 
-const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: "offers", label: "Angebote", icon: "🏷️" },
-  { id: "search", label: "Suchen", icon: "🔍" },
-  { id: "add", label: "Eintragen", icon: "➕" },
-  { id: "settings", label: "Einstellungen", icon: "⚙️" },
+const TABS: { id: Tab; label: string; title: string; icon: string }[] = [
+  { id: "offers", label: "Angebote", title: "Angebote", icon: "🏷️" },
+  { id: "search", label: "Suchen", title: "Suchen", icon: "🔍" },
+  { id: "products", label: "Produkte", title: "Meine Produkte", icon: "⭐" },
+  { id: "settings", label: "Einstellungen", title: "Einstellungen", icon: "⚙️" },
 ];
 
 const timeFormat = new Intl.DateTimeFormat("de-DE", { weekday: "short", hour: "2-digit", minute: "2-digit" });
@@ -38,17 +36,16 @@ export default function App() {
   const [watchlist, setWatchlist] = useState(loadWatchlist);
   const [zip, setZip] = useState(loadZip);
   const [markets, setMarkets] = useState(loadMarkets);
-  const [offers, setOffers] = useState(loadOffers);
   const [remote, setRemote] = useState<RemoteCache | null>(loadRemote);
   const [newIds, setNewIds] = useState<Set<string>>(() => new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [reloadToken, setReloadToken] = useState(0);
 
+  useEffect(removeLegacyOffers, []);
   useEffect(() => saveWatchlist(watchlist), [watchlist]);
   useEffect(() => saveZip(zip), [zip]);
   useEffect(() => saveMarkets(markets), [markets]);
-  useEffect(() => saveOffers(offers), [offers]);
 
   const validZip = /^\d{5}$/.test(zip);
   const termsKey = watchlist.join(",");
@@ -83,21 +80,12 @@ export default function App() {
     return () => controller.abort();
   }, [zip, validZip, termsKey, reloadToken]);
 
-  const allOffers = useMemo(
-    () => (remote && remote.zip === zip ? [...offers, ...remote.offers] : offers),
-    [offers, remote, zip],
+  const visibleOffers = useMemo(
+    () => (remote && remote.zip === zip ? remote.offers.filter((o) => markets.includes(o.market)) : []),
+    [remote, zip, markets],
   );
-  const visibleOffers = useMemo(() => allOffers.filter((o) => markets.includes(o.market)), [allOffers, markets]);
   const groups = useMemo(() => groupByTerm(visibleOffers, watchlist), [visibleOffers, watchlist]);
-
-  function addOffer(offer: Offer) {
-    setOffers((prev) => [...prev, offer]);
-    setTab("offers");
-  }
-
-  function removeOffer(id: string) {
-    setOffers((prev) => prev.filter((o) => o.id !== id));
-  }
+  const offerCounts = useMemo(() => new Map(groups.map((g) => [g.term, g.offers.length])), [groups]);
 
   function addTerm(term: string) {
     setWatchlist((prev) => (prev.some((w) => w.toLowerCase() === term.toLowerCase()) ? prev : [...prev, term]));
@@ -106,7 +94,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>{TABS.find((t) => t.id === tab)!.label}</h1>
+        <h1>{TABS.find((t) => t.id === tab)!.title}</h1>
         {tab === "offers" && validZip && (
           <div className="header-actions">
             <span className="zip-chip">📍 {zip}</span>
@@ -146,7 +134,7 @@ export default function App() {
 
             {watchlist.length === 0 ? (
               <p className="empty">
-                Deine Merkliste ist leer. Füg unter <b>Einstellungen</b> Produkte hinzu.
+                Du hast noch keine Produkte. Füg unter <b>Produkte</b> welche hinzu.
               </p>
             ) : (
               groups.map((group) => (
@@ -158,7 +146,7 @@ export default function App() {
                   {group.offers.length === 0 ? (
                     <p className="none">{loading ? "…" : "Gerade kein Angebot bekannt."}</p>
                   ) : (
-                    <OfferList offers={group.offers} newIds={newIds} onRemove={removeOffer} />
+                    <OfferList offers={group.offers} newIds={newIds} />
                   )}
                 </section>
               ))
@@ -168,17 +156,12 @@ export default function App() {
 
         {tab === "search" && <Search zip={zip} markets={markets} watchlist={watchlist} onAddTerm={addTerm} />}
 
-        {tab === "add" && <AddOffer watchlist={watchlist} onAdd={addOffer} />}
+        {tab === "products" && (
+          <MyProducts watchlist={watchlist} onWatchlistChange={setWatchlist} offerCounts={offerCounts} />
+        )}
 
         {tab === "settings" && (
-          <Settings
-            watchlist={watchlist}
-            onWatchlistChange={setWatchlist}
-            zip={zip}
-            onZipChange={setZip}
-            markets={markets}
-            onMarketsChange={setMarkets}
-          />
+          <Settings zip={zip} onZipChange={setZip} markets={markets} onMarketsChange={setMarkets} />
         )}
       </main>
 

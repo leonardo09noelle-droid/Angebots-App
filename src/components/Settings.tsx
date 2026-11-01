@@ -1,29 +1,13 @@
-import { useState, type FormEvent } from "react";
 import { MARKETS, type Market } from "../types";
 
 interface Props {
-  watchlist: string[];
-  onWatchlistChange: (list: string[]) => void;
   zip: string;
   onZipChange: (zip: string) => void;
   markets: Market[];
   onMarketsChange: (markets: Market[]) => void;
 }
 
-export function Settings({ watchlist, onWatchlistChange, zip, onZipChange, markets, onMarketsChange }: Props) {
-  const [newTerm, setNewTerm] = useState("");
-
-  function addTerm(e: FormEvent) {
-    e.preventDefault();
-    // Kommas trennen in der Suche die Produkte, deshalb raus damit
-    const term = newTerm.replace(/,/g, " ").replace(/\s+/g, " ").trim();
-    if (!term) return;
-    if (!watchlist.some((w) => w.toLowerCase() === term.toLowerCase())) {
-      onWatchlistChange([...watchlist, term]);
-    }
-    setNewTerm("");
-  }
-
+export function Settings({ zip, onZipChange, markets, onMarketsChange }: Props) {
   function toggleMarket(market: Market) {
     // Reihenfolge wie in MARKETS behalten
     const next = markets.includes(market) ? markets.filter((m) => m !== market) : [...markets, market];
@@ -32,31 +16,6 @@ export function Settings({ watchlist, onWatchlistChange, zip, onZipChange, marke
 
   return (
     <div className="settings">
-      <section className="card">
-        <h2>Meine Produkte</h2>
-        <p className="hint">Je genauer, desto besser: „Monster Energy“ statt nur „Monster“.</p>
-        <ul className="watchlist">
-          {watchlist.map((w) => (
-            <li key={w}>
-              <span>{w}</span>
-              <button
-                className="remove-inline"
-                onClick={() => onWatchlistChange(watchlist.filter((x) => x !== w))}
-                aria-label={`${w} entfernen`}
-              >
-                Entfernen
-              </button>
-            </li>
-          ))}
-        </ul>
-        <form className="add-term" onSubmit={addTerm}>
-          <input value={newTerm} onChange={(e) => setNewTerm(e.target.value)} placeholder="z. B. Red Bull" />
-          <button className="primary" type="submit" disabled={!newTerm.trim()}>
-            Hinzufügen
-          </button>
-        </form>
-      </section>
-
       <section className="card">
         <h2>Meine Märkte</h2>
         <p className="hint">Nur Angebote aus angehakten Märkten werden angezeigt.</p>

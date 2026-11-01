@@ -466,6 +466,11 @@ select:focus {
   color: var(--accent);
 }
 
+.detail-facts dd.text-muted {
+  color: var(--muted);
+  font-weight: 400;
+}
+
 .detail-note {
   margin-top: 16px;
 }
@@ -508,13 +513,43 @@ select:focus {
   background: none;
 }
 
-.danger {
-  border: 1px solid var(--danger);
-  border-radius: 10px;
-  color: var(--danger);
-  font-weight: 700;
-  background: none;
+.watch-name {
+  display: grid;
+  gap: 2px;
+  font-weight: 600;
+}
+
+.watch-count {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.hint-tight {
+  margin: 10px 0 0;
+  font-size: 13px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
+}
+
+.chip:active {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .market-grid {

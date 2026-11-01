@@ -6,7 +6,6 @@ export const MARKETS = [
   "Netto",
   "Rewe",
   "Edeka",
-  "Kaufland",
 ] as const;
 
 export type Market = (typeof MARKETS)[number];

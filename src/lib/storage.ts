@@ -6,7 +6,6 @@ import { MARKETS, type Market, type Offer } from "../types";
 const KEYS = {
   watchlist: "angebote.watchlist",
   zip: "angebote.zip",
-  offers: "angebote.offers",
   remote: "angebote.remote",
   markets: "angebote.markets",
   seen: "angebote.seen",
@@ -46,8 +45,14 @@ export const saveWatchlist = (list: string[]) => write(KEYS.watchlist, list);
 export const loadZip = () => read<string>(KEYS.zip, "");
 export const saveZip = (zip: string) => write(KEYS.zip, zip);
 
-export const loadOffers = () => read<Offer[]>(KEYS.offers, []);
-export const saveOffers = (offers: Offer[]) => write(KEYS.offers, offers);
+/** Selbst eingetragene Angebote gibt es nicht mehr: alten Speicher einmal aufräumen */
+export function removeLegacyOffers(): void {
+  try {
+    localStorage.removeItem("angebote.offers");
+  } catch {
+    // nichts zu tun
+  }
+}
 
 export const loadRemote = () => read<RemoteCache | null>(KEYS.remote, null);
 export const saveRemote = (cache: RemoteCache) => write(KEYS.remote, cache);
