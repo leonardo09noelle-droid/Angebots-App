@@ -19,16 +19,16 @@ export interface Release {
  * das aktuelle Update plus die besten Funktionen aus allen Versionen davor.
  */
 export const WELCOME_RELEASE: Release = {
-  version: "3.0",
+  version: "3.1",
   date: "2026-11-02",
   title: "Alles neu",
   highlights: [
     {
       icon: "🚀",
-      title: "Frisch erschienen: Version 3.0",
+      title: "Frisch erschienen: Version 3.1",
       text:
-        "Das größte Update seit Beginn: Die App ist von Grund auf neu aufgebaut, übersichtlicher, schneller " +
-        "und sparsamer. Und es geht weiter, regelmäßig kommen neue Funktionen dazu.",
+        "Gerade erst hat die App ihr größtes Update seit Beginn bekommen: von Grund auf neu aufgebaut, " +
+        "übersichtlicher, schneller und sparsamer. Und es geht weiter, regelmäßig kommen neue Funktionen dazu.",
     },
     {
       icon: "⭐",
@@ -69,6 +69,28 @@ export const WELCOME_RELEASE: Release = {
 };
 
 export const RELEASES: Release[] = [
+  {
+    version: "3.1",
+    date: "2026-11-02",
+    title: "Deine Reihenfolge",
+    highlights: [
+      {
+        icon: "↕️",
+        title: "Favoriten sortieren",
+        text:
+          "Monster Energy soll ganz oben stehen? Tipp auf Start auf „Bearbeiten“, halt den Griff ≡ fest und " +
+          "zieh den Favoriten dahin, wo du ihn haben willst. Genau in dieser Reihenfolge siehst du ab jetzt " +
+          "deine Angebote.",
+      },
+      {
+        icon: "📱",
+        title: "Fühlt sich an wie eine echte App",
+        text:
+          "Kein versehentliches blaues Markieren mehr, wenn du länger auf eine Karte drückst. Alles bleibt " +
+          "ruhig und sauber. In der Suche kannst du natürlich weiter Text einfügen und kopieren.",
+      },
+    ],
+  },
   {
     version: "3.0",
     revision: 2,

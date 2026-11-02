@@ -48,6 +48,18 @@ body {
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-tap-highlight-color: transparent;
+  /* Wie eine echte App: Gedrückthalten markiert keinen Text und öffnet kein Kopieren-/Bild-Menü */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* In Eingabefeldern bleibt Markieren, Kopieren und Einfügen erlaubt */
+input,
+textarea {
+  user-select: text;
+  -webkit-user-select: text;
+  -webkit-touch-callout: default;
 }
 
 button,
@@ -1192,11 +1204,49 @@ select:focus {
 }
 
 .watchlist li {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 8px;
   padding: 10px 0;
   border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+/* Nur während des Ziehens animieren; beim Loslassen springt alles ohne Nachruckeln an den neuen Platz */
+.watchlist.sorting li {
+  transition: transform 0.2s ease;
+}
+
+.watchlist .watch-name {
+  flex: 1;
+}
+
+/* Die gezogene Zeile folgt dem Finger ohne Verzögerung und liegt über den anderen */
+.watchlist li.dragging {
+  z-index: 2;
+  transition: none;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.45);
+}
+
+/* Griff zum Sortieren: groß genug für den Daumen, und hier scrollt die Seite nicht mit */
+.drag-handle {
+  flex-shrink: 0;
+  width: 40px;
+  height: 44px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 22px;
+  line-height: 1;
+  touch-action: none;
+  cursor: grab;
+}
+
+.watchlist li.dragging .drag-handle {
+  color: var(--accent);
+  cursor: grabbing;
 }
 
 .remove-inline {

@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from "react";
 import type { WatchItem } from "../types";
 import { findCategory } from "../lib/categories";
+import { moveItem } from "../lib/favorites";
 import type { OfferGroup } from "../lib/offers";
 import { OfferList } from "./OfferList";
 import { ZipPrompt } from "./ZipPrompt";
@@ -28,8 +29,8 @@ function cleanTerm(term: string): string {
 }
 
 /**
- * Startseite: Angebote für alle Favoriten. "Bearbeiten" zeigt nur die Namen, wie in iOS-Listen:
- * Namen antippen zum Umbenennen, ✕ zum Entfernen.
+ * Startseite: Angebote für alle Favoriten, in der Reihenfolge der Favoriten. "Bearbeiten" zeigt nur
+ * die Namen, wie in iOS-Listen: ≡ ziehen zum Sortieren, Namen antippen zum Umbenennen, ✕ zum Entfernen.
  */
 export function Home({
   validZip,
@@ -63,6 +64,48 @@ export function Home({
       onWatchlistChange(watchlist.map((w) => (w.term === editing ? { ...w, term: clean } : w)));
     }
     setEditing(null);
+  }
+
+  // Sortieren: Griff ≡ festhalten und ziehen. from/to: Platz vorher/nachher, dy: wie weit gezogen
+  const [drag, setDrag] = useState<{ from: number; to: number; dy: number; startY: number; rowH: number } | null>(
+    null,
+  );
+
+  function onHandleDown(e: PointerEvent<HTMLButtonElement>, index: number) {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    const rowH = e.currentTarget.closest("li")!.getBoundingClientRect().height;
+    setDrag({ from: index, to: index, dy: 0, startY: e.clientY, rowH });
+  }
+
+  function onHandleMove(e: PointerEvent<HTMLButtonElement>) {
+    if (!drag) return;
+    const dy = e.clientY - drag.startY;
+    const to = Math.max(0, Math.min(watchlist.length - 1, drag.from + Math.round(dy / drag.rowH)));
+    setDrag({ ...drag, dy, to });
+  }
+
+  function onHandleUp() {
+    if (!drag) return;
+    if (drag.to !== drag.from) onWatchlistChange(moveItem(watchlist, drag.from, drag.to));
+    setDrag(null);
+  }
+
+  /** Tastatur: Pfeil hoch/runter verschiebt um einen Platz */
+  function onHandleKey(e: KeyboardEvent, index: number) {
+    const step = e.key === "ArrowUp" ? -1 : e.key === "ArrowDown" ? 1 : 0;
+    if (!step) return;
+    e.preventDefault();
+    onWatchlistChange(moveItem(watchlist, index, index + step));
+  }
+
+  /** Gezogene Zeile folgt dem Finger, die überholten rutschen einen Platz weiter */
+  function rowStyle(index: number): CSSProperties | undefined {
+    if (!drag) return undefined;
+    const { from, to, dy, rowH } = drag;
+    if (index === from) return { transform: `translateY(${dy}px)` };
+    if (from < to && index > from && index <= to) return { transform: `translateY(${-rowH}px)` };
+    if (from > to && index >= to && index < from) return { transform: `translateY(${rowH}px)` };
+    return undefined;
   }
 
   const counts = new Map(groups.map((g) => [g.term, g.offers.length]));
@@ -107,11 +150,23 @@ export function Home({
 
           {editMode ? (
             <section className="card">
-              <ul className="watchlist">
-                {watchlist.map((w) => {
+              <ul className={`watchlist${drag ? " sorting" : ""}`}>
+                {watchlist.map((w, index) => {
                   const count = counts.get(w.term) ?? 0;
                   return (
-                    <li key={w.term}>
+                    <li key={w.term} className={drag?.from === index ? "dragging" : ""} style={rowStyle(index)}>
+                      <button
+                        className="drag-handle"
+                        data-no-swipe
+                        onPointerDown={(e) => onHandleDown(e, index)}
+                        onPointerMove={onHandleMove}
+                        onPointerUp={onHandleUp}
+                        onPointerCancel={() => setDrag(null)}
+                        onKeyDown={(e) => onHandleKey(e, index)}
+                        aria-label={`${w.term} verschieben (Pfeiltasten)`}
+                      >
+                        ≡
+                      </button>
                       {editing === w.term ? (
                         <form
                           className="watch-edit"
@@ -151,7 +206,9 @@ export function Home({
                   );
                 })}
               </ul>
-              <p className="hint hint-tight">Namen antippen zum Umbenennen, ✕ zum Entfernen.</p>
+              <p className="hint hint-tight">
+                ≡ festhalten und ziehen zum Sortieren, Namen antippen zum Umbenennen, ✕ zum Entfernen.
+              </p>
             </section>
           ) : (
             groups.map((group) => (

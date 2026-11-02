@@ -1,6 +1,20 @@
 import { describe, expect, it } from "vitest";
 import type { Offer } from "../types";
-import { favoriteOf } from "./favorites";
+import { favoriteOf, moveItem } from "./favorites";
+
+describe("moveItem", () => {
+  it("schiebt nach oben und nach unten", () => {
+    expect(moveItem(["Kölln", "Pringles", "Monster"], 2, 0)).toEqual(["Monster", "Kölln", "Pringles"]);
+    expect(moveItem(["Kölln", "Pringles", "Monster"], 0, 2)).toEqual(["Pringles", "Monster", "Kölln"]);
+  });
+
+  it("lässt die Liste bei gleichem Platz oder ungültigem Start in Ruhe", () => {
+    const list = ["a", "b"];
+    expect(moveItem(list, 1, 1)).toBe(list);
+    expect(moveItem(list, 5, 0)).toBe(list);
+    expect(moveItem(list, 0, 9)).toEqual(["b", "a"]);
+  });
+});
 
 const offer = (o: Partial<Offer>): Offer => ({
   id: "x",
