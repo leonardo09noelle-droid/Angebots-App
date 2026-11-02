@@ -76,7 +76,7 @@ export function TabBar<T extends string>({ tabs, active, onChange }: Props<T>) {
         <span
           className="tab-bubble"
           aria-hidden
-          style={{ width: slot, transform: `translateX(${bubbleLeft + PADDING}px)` }}
+          style={{ width: slot, translate: `${bubbleLeft + PADDING}px 0` }}
         />
       )}
       {tabs.map((t, i) => (

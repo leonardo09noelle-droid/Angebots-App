@@ -14,6 +14,31 @@ export interface Release {
 
 export const RELEASES: Release[] = [
   {
+    version: "2.0",
+    title: "Neues Design",
+    highlights: [
+      {
+        icon: "🌑",
+        title: "Dunkel & kontrastreich",
+        text:
+          "Die App hat einen neuen Look: tiefes Schwarz, klare Schrift und Neon-Grün als Akzent. " +
+          "Preise leuchten jetzt grün und springen sofort ins Auge. Alle Infos sind geblieben, wo sie waren.",
+      },
+      {
+        icon: "🖼️",
+        title: "Saubere Produktbilder",
+        text: "Die Produktfotos sitzen jetzt auf einem hellen Kärtchen und heben sich besser vom dunklen Hintergrund ab.",
+      },
+      {
+        icon: "🫧",
+        title: "Glas-Blase repariert",
+        text:
+          "Wenn du den Finger auf der Leiste unten nach rechts ziehst, rutscht die Blase nicht mehr über " +
+          "Einstellungen hinaus. Sie stoppt jetzt auf beiden Seiten gleich am Rand.",
+      },
+    ],
+  },
+  {
     version: "1.7",
     title: "Protein & Bearbeiten",
     highlights: [
