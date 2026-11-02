@@ -347,9 +347,31 @@ select:focus {
   letter-spacing: 0.04em;
 }
 
+/* Merken und Teilen nebeneinander, mit Abstand für den Daumen */
+.card-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
 .share-wrap {
   position: relative;
-  margin-top: 8px;
+}
+
+.star-round {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.star-round.on,
+.star-wide.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+.star-wide {
+  cursor: pointer;
 }
 
 .share-btn {

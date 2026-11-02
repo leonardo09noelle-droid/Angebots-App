@@ -12,6 +12,7 @@ import {
   loyaltyApp,
   variety,
 } from "../lib/offers";
+import { favoriteOf, useFavorites } from "../lib/favorites";
 import { useShare } from "../lib/useShare";
 import { ShareIcon } from "./ShareIcon";
 
@@ -50,6 +51,9 @@ export function OfferDetail({ offer, cheapest, onClose }: Props) {
   // Groß der Anzeigename ("Red Bull"), darunter der Produktname laut Prospekt ("Energy Drink")
   const title = displayName(offer);
   const subtitle = offer.product;
+  const favorites = useFavorites();
+  const favorite = favoriteOf(offer);
+  const saved = !!favorites?.isFavorite(favorite);
 
   // Escape schließt, dahinter scrollt nichts mit
   useEffect(() => {
@@ -186,6 +190,15 @@ export function OfferDetail({ offer, cheapest, onClose }: Props) {
           )}
 
           <div className="detail-actions">
+            {favorites && (
+              <button
+                className={`secondary big star-wide${saved ? " on" : ""}`}
+                onClick={() => favorites.toggle(favorite)}
+                aria-pressed={saved}
+              >
+                {saved ? `★ ${favorite.term} gemerkt` : `☆ ${favorite.term} merken`}
+              </button>
+            )}
             <button className="primary big" onClick={share}>
               <ShareIcon size={18} /> {feedback || "Teilen"}
             </button>

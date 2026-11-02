@@ -7,14 +7,72 @@ export interface Release {
   version: string;
   /** Nachbesserung derselben Version (2, 3, …) */
   revision?: number;
+  /** Erscheinungstag YYYY-MM-DD, steht im Fenster ("Update vom 2. November") */
+  date?: string;
   title: string;
   /** Wichtigstes zuerst */
   highlights: { icon: string; title: string; text: string }[];
 }
 
+/**
+ * Wer die App neu installiert, sieht statt aller alten Versionen nur dieses eine Fenster:
+ * das aktuelle Update plus die besten Funktionen aus allen Versionen davor.
+ */
+export const WELCOME_RELEASE: Release = {
+  version: "3.0",
+  date: "2026-11-02",
+  title: "Alles neu",
+  highlights: [
+    {
+      icon: "🚀",
+      title: "Frisch erschienen: Version 3.0",
+      text:
+        "Das größte Update seit Beginn: Die App ist von Grund auf neu aufgebaut, übersichtlicher, schneller " +
+        "und sparsamer. Und es geht weiter, regelmäßig kommen neue Funktionen dazu.",
+    },
+    {
+      icon: "⭐",
+      title: "Ein Stern für alles",
+      text:
+        "Marke, ganze Kategorie oder einzelnes Produkt direkt auf der Angebotskarte: Ein Tipp auf ☆, und es " +
+        "landet auf deiner Startseite. Ab dann sucht die App automatisch die Angebote dafür.",
+    },
+    {
+      icon: "🧠",
+      title: "Intelligente Suche",
+      text:
+        "Vertippt? Aus „Prngles“ wird Pringles. „Gummibärchen“ findet auch Fruchtgummi, und beim Tippen " +
+        "schlägt die App passende Marken vor.",
+    },
+    {
+      icon: "🏆",
+      title: "Der Günstigste auf einen Blick",
+      text:
+        "Die App vergleicht dieselbe Marke über alle Märkte und markiert den besten Preis, wenn möglich sogar " +
+        "nach Preis pro Liter oder Kilo. Rabatt in Prozent und „Nur noch heute“ springen sofort ins Auge.",
+    },
+    {
+      icon: "🛒",
+      title: "Alle großen Märkte",
+      text:
+        "Lidl, Aldi Nord & Süd, Penny, Netto, Rewe und Edeka in deiner Nähe. Preise, die nur mit Kunden-App " +
+        "gelten, sind markiert, und jedes Angebot kannst du mit einem Tipp an Freunde schicken.",
+    },
+    {
+      icon: "🔋",
+      title: "Spart Akku und Daten",
+      text:
+        "Die App lädt nur, was du wirklich brauchst: deine Favoriten und deine Suchen. Frische Angebote " +
+        "kommen sofort aus dem Speicher.",
+    },
+  ],
+};
+
 export const RELEASES: Release[] = [
   {
     version: "3.0",
+    revision: 2,
+    date: "2026-11-02",
     title: "Alles neu",
     highlights: [
       {
@@ -39,11 +97,18 @@ export const RELEASES: Release[] = [
           "und es landet direkt auf deiner Startseite. Den komplizierten Marken-Schalter gibt es nicht mehr.",
       },
       {
+        icon: "📌",
+        title: "Einzelne Produkte merken",
+        text:
+          "Bei Schokolade entdeckt, dass Kinder Joy im Angebot ist? Tipp direkt auf der Karte auf ☆ und du merkst " +
+          "dir genau Kinder Joy, nicht gleich die ganze Schokolade. Geht auch in der Detailansicht.",
+      },
+      {
         icon: "🔍",
         title: "Entdecken statt suchen",
         text:
-          "Suche, beliebte Marken und alle Kategorien an einem Ort. Die schlaue Suche versteht weiter " +
-          "Tippfehler und merkt sich, wo du warst.",
+          "Suche, beliebte Marken und alle Kategorien an einem Ort, neu mit der Kategorie Müsli. Die schlaue " +
+          "Suche versteht weiter Tippfehler und merkt sich, wo du warst.",
       },
       {
         icon: "🔋",
@@ -51,11 +116,6 @@ export const RELEASES: Release[] = [
         text:
           "Die App lädt nur noch, was wirklich neu ist: Frische Angebote kommen sofort aus dem Speicher, " +
           "ein neuer Favorit lädt nur sich selbst, und dieselbe Suche wird nicht doppelt abgerufen.",
-      },
-      {
-        icon: "🥣",
-        title: "Neu: Müsli",
-        text: "Die neue Kategorie Frühstück startet mit Müsli und Granola. Perfekt für deinen nächsten Wocheneinkauf.",
       },
     ],
   },

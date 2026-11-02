@@ -10,6 +10,7 @@ import {
   loyaltyLabel,
   variety,
 } from "../lib/offers";
+import { favoriteOf, useFavorites } from "../lib/favorites";
 import { useShare } from "../lib/useShare";
 import { ShareIcon } from "./ShareIcon";
 
@@ -30,9 +31,19 @@ export function OfferCard({ offer, cheapest, isNew, onOpen }: Props) {
   const mixed = variety(offer) === "mixed";
   const title = displayName(offer);
 
+  // ☆ merkt genau dieses Produkt (z. B. "Kinder Joy"), nicht die ganze Kategorie
+  const favorites = useFavorites();
+  const favorite = favoriteOf(offer);
+  const saved = !!favorites?.isFavorite(favorite);
+
   function onShareClick(e: MouseEvent) {
     e.stopPropagation(); // nicht gleichzeitig die Details öffnen
     share();
+  }
+
+  function onStarClick(e: MouseEvent) {
+    e.stopPropagation();
+    favorites?.toggle(favorite);
   }
 
   function onKeyDown(e: KeyboardEvent) {
@@ -89,11 +100,23 @@ export function OfferCard({ offer, cheapest, isNew, onOpen }: Props) {
             {formatPrice(offer.referencePrice)}/{offer.referenceUnit}
           </span>
         )}
-        <span className="share-wrap">
-          <button className="share-btn" onClick={onShareClick} aria-label="Angebot teilen">
-            <ShareIcon />
-          </button>
-          {feedback && <span className="share-toast">{feedback}</span>}
+        <span className="card-actions">
+          {favorites && (
+            <button
+              className={`share-btn star-round${saved ? " on" : ""}`}
+              onClick={onStarClick}
+              aria-pressed={saved}
+              aria-label={saved ? `${favorite.term} nicht mehr merken` : `${favorite.term} merken`}
+            >
+              {saved ? "★" : "☆"}
+            </button>
+          )}
+          <span className="share-wrap">
+            <button className="share-btn" onClick={onShareClick} aria-label="Angebot teilen">
+              <ShareIcon />
+            </button>
+            {feedback && <span className="share-toast">{feedback}</span>}
+          </span>
         </span>
       </div>
 

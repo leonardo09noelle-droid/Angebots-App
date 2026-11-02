@@ -29,7 +29,17 @@ export interface RemoteCache {
   termFetchedAt?: Record<string, number>;
 }
 
-export const DEFAULT_WATCHLIST: WatchItem[] = [{ term: "Monster Energy" }, { term: "Proteinriegel" }];
+/** Neu installiert: keine vorgegebenen Produkte, jeder startet mit einer leeren Startseite */
+export const DEFAULT_WATCHLIST: WatchItem[] = [];
+
+/** Allererster Start auf diesem Handy: noch nie etwas gespeichert und nie "Was ist neu" gesehen */
+export function isFirstStart(): boolean {
+  try {
+    return [KEYS.watchlist, KEYS.zip, KEYS.seenVersions, KEYS.seenVersion].every((k) => localStorage.getItem(k) === null);
+  } catch {
+    return false;
+  }
+}
 
 function read<T>(key: string, fallback: T): T {
   try {

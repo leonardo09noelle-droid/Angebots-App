@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import type { Offer } from "../types";
-import { learnBrands, loadMarkets, loadWatchlist, parseWatchlist, removeLegacyOffers } from "./storage";
+import { isFirstStart, learnBrands, loadMarkets, loadWatchlist, parseWatchlist, removeLegacyOffers } from "./storage";
 
 // Kleiner localStorage-Ersatz für die Tests (Node hat keinen)
 const store = new Map<string, string>();
@@ -49,8 +49,22 @@ describe("Favoriten", () => {
     ]);
   });
 
-  it("startet mit Monster Energy und Proteinriegel", () => {
-    expect(loadWatchlist()).toEqual([{ term: "Monster Energy" }, { term: "Proteinriegel" }]);
+  it("startet bei Neuinstallation ohne vorgegebene Produkte", () => {
+    expect(loadWatchlist()).toEqual([]);
+  });
+});
+
+describe("isFirstStart", () => {
+  it("erkennt eine frische Installation", () => {
+    expect(isFirstStart()).toBe(true);
+  });
+
+  it("zählt nicht als erster Start, wenn schon etwas gespeichert ist", () => {
+    store.set("angebote.seenVersion", JSON.stringify("1.5"));
+    expect(isFirstStart()).toBe(false);
+    store.clear();
+    store.set("angebote.zip", JSON.stringify("10115"));
+    expect(isFirstStart()).toBe(false);
   });
 });
 

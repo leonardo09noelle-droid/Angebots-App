@@ -3,9 +3,11 @@ import type { WatchItem } from "../types";
 import { findCategory } from "../lib/categories";
 import type { OfferGroup } from "../lib/offers";
 import { OfferList } from "./OfferList";
+import { ZipPrompt } from "./ZipPrompt";
 
 interface Props {
   validZip: boolean;
+  onZipChange: (zip: string) => void;
   noMarkets: boolean;
   watchlist: WatchItem[];
   onWatchlistChange: (list: WatchItem[]) => void;
@@ -31,6 +33,7 @@ function cleanTerm(term: string): string {
  */
 export function Home({
   validZip,
+  onZipChange,
   noMarkets,
   watchlist,
   onWatchlistChange,
@@ -72,9 +75,7 @@ export function Home({
   return (
     <>
       {!validZip ? (
-        <p className="notice">
-          Trag unter <b>Einstellungen</b> deine Postleitzahl ein, dann suche ich die Angebote automatisch.
-        </p>
+        <ZipPrompt onZipChange={onZipChange} />
       ) : (
         status && <p className={`status${statusIsError ? " status-error" : ""}`}>{status}</p>
       )}
@@ -85,7 +86,7 @@ export function Home({
         </p>
       )}
 
-      {watchlist.length === 0 ? (
+      {!validZip ? null : watchlist.length === 0 ? (
         <div className="empty">
           <p>
             Noch keine Favoriten. Such unter <b>Entdecken</b> nach Marken, Produkten oder Kategorien und tipp auf{" "}

@@ -7,6 +7,12 @@ interface Props {
   onClose: () => void;
 }
 
+/** "2026-11-02" -> "2. November" */
+function releaseDate(iso: string): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString("de-DE", { day: "numeric", month: "long" });
+}
+
 /** "Was ist neu"-Fenster; bei mehreren verpassten Versionen mit Reitern ("1.5 | 1.4") */
 export function WhatsNew({ releases, onClose }: Props) {
   const [index, setIndex] = useState(0);
@@ -49,6 +55,7 @@ export function WhatsNew({ releases, onClose }: Props) {
         ) : (
           <span className="whatsnew-version">
             {release.revision ? `Version ${release.version} – aktualisiert` : `Neu in Version ${release.version}`}
+            {release.date && ` · ${releaseDate(release.date)}`}
           </span>
         )}
 

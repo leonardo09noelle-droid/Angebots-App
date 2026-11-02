@@ -3,9 +3,11 @@ import type { Offer, WatchItem } from "./types";
 import { groupByTerm, markNew } from "./lib/offers";
 import { fetchOffers } from "./lib/api";
 import { allBrands } from "./lib/brands";
-import { releaseKey, unseenReleases } from "./lib/changelog";
+import { RELEASES, WELCOME_RELEASE, releaseKey, unseenReleases } from "./lib/changelog";
+import { FavoritesContext } from "./lib/favorites";
 import { fetchedAtOf, mergeRemote, searchTermOf, termsToFetch, upgradeCache } from "./lib/remote";
 import {
+  isFirstStart,
   learnBrands,
   loadLearnedBrands,
   loadMarkets,
@@ -61,8 +63,11 @@ export default function App() {
   const [learnedBrands, setLearnedBrands] = useState(loadLearnedBrands);
   // Kurzer Hinweis über der Tab-Leiste, z. B. nach dem Merken
   const [toast, setToast] = useState<{ text: string; id: number } | null>(null);
-  // "Was ist neu": alle verpassten Versionen zeigen, nach dem ✕ nie wieder
-  const [missedReleases, setMissedReleases] = useState(() => unseenReleases(loadSeenVersions()));
+  // "Was ist neu": alle verpassten Versionen zeigen, nach dem ✕ nie wieder. Neu installiert: nur ein
+  // Willkommens-Fenster mit dem aktuellen Update und den besten Funktionen
+  const [missedReleases, setMissedReleases] = useState(() =>
+    isFirstStart() ? [WELCOME_RELEASE] : unseenReleases(loadSeenVersions()),
+  );
   const brands = useMemo(() => allBrands(learnedBrands), [learnedBrands]);
 
   /** Marken aus Ergebnissen merken, für Vorschläge und "Meintest du …?" */
@@ -209,7 +214,9 @@ export default function App() {
   const standAt = fetchedTimes.length ? Math.min(...fetchedTimes) : undefined;
 
   function closeWhatsNew() {
-    saveSeenVersions([...new Set([...loadSeenVersions(), ...missedReleases.map(releaseKey)])]);
+    // Nach dem Willkommens-Fenster gelten auch alle älteren Versionen als gesehen
+    const closed = missedReleases.includes(WELCOME_RELEASE) ? RELEASES : missedReleases;
+    saveSeenVersions([...new Set([...loadSeenVersions(), ...closed.map(releaseKey)])]);
     setMissedReleases([]);
   }
 
@@ -229,85 +236,89 @@ export default function App() {
   const isFavorite = (item: WatchItem) => watchlist.some((w) => sameFavorite(w, item));
 
   return (
-    <div className="app">
-      <header className="app-header">
-        <h1>{TABS.find((t) => t.id === tab)!.title}</h1>
-        {tab === "home" && validZip && (
-          <div className="header-actions">
-            <span className="zip-chip">📍 {zip}</span>
-            <button
-              className={`refresh${loading ? " spinning" : ""}`}
-              onClick={refresh}
-              disabled={loading}
-              aria-label="Angebote aktualisieren"
-            >
-              ↻
-            </button>
+    <FavoritesContext.Provider value={{ isFavorite, toggle: (item) => toggleFavorite(item) }}>
+      <div className="app">
+        <header className="app-header">
+          <h1>{TABS.find((t) => t.id === tab)!.title}</h1>
+          {tab === "home" && validZip && (
+            <div className="header-actions">
+              <span className="zip-chip">📍 {zip}</span>
+              <button
+                className={`refresh${loading ? " spinning" : ""}`}
+                onClick={refresh}
+                disabled={loading}
+                aria-label="Angebote aktualisieren"
+              >
+                ↻
+              </button>
+            </div>
+          )}
+        </header>
+
+        <main className="content" ref={contentRef} {...swipe}>
+          {/* key: bei jedem Tab neu, damit die Gleit-Animation jedes Mal läuft */}
+          {tab !== "discover" && (
+            <div key={tab} ref={pageRef} className={`tab-page${slide ? ` slide-${slide}` : ""}`}>
+              {tab === "home" && (
+                <Home
+                  validZip={validZip}
+                  onZipChange={setZip}
+                  noMarkets={markets.length === 0}
+                  watchlist={watchlist}
+                  onWatchlistChange={setWatchlist}
+                  groups={groups}
+                  newIds={newIds}
+                  loading={loading}
+                  status={
+                    error ||
+                    (loading
+                      ? "Suche Angebote …"
+                      : standAt !== undefined
+                        ? `Stand: ${timeFormat.format(standAt)} · Quelle: marktguru`
+                        : "")
+                  }
+                  statusIsError={!!error}
+                  onDiscover={() => goTo("discover")}
+                />
+              )}
+
+              {tab === "settings" && (
+                <Settings zip={zip} onZipChange={setZip} markets={markets} onMarketsChange={setMarkets} />
+              )}
+            </div>
+          )}
+
+          {/*
+           * Entdecken wird nur versteckt, nie abgebaut: Suchbegriff, Ergebnisse und Filter bleiben beim
+           * Tab-Wechsel erhalten. Die Gleit-Animation startet beim Wiedereinblenden von selbst neu.
+           */}
+          <div
+            ref={tab === "discover" ? pageRef : undefined}
+            className={`tab-page${slide ? ` slide-${slide}` : ""}`}
+            hidden={tab !== "discover"}
+          >
+            <Search
+              zip={zip}
+              onZipChange={setZip}
+              markets={markets}
+              brands={brands}
+              isFavorite={isFavorite}
+              onToggleFavorite={toggleFavorite}
+              onResults={rememberBrands}
+            />
+          </div>
+        </main>
+
+        {toast && (
+          <div key={toast.id} className="toast" role="status">
+            {toast.text}
           </div>
         )}
-      </header>
 
-      <main className="content" ref={contentRef} {...swipe}>
-        {/* key: bei jedem Tab neu, damit die Gleit-Animation jedes Mal läuft */}
-        {tab !== "discover" && (
-          <div key={tab} ref={pageRef} className={`tab-page${slide ? ` slide-${slide}` : ""}`}>
-            {tab === "home" && (
-              <Home
-                validZip={validZip}
-                noMarkets={markets.length === 0}
-                watchlist={watchlist}
-                onWatchlistChange={setWatchlist}
-                groups={groups}
-                newIds={newIds}
-                loading={loading}
-                status={
-                  error ||
-                  (loading
-                    ? "Suche Angebote …"
-                    : standAt !== undefined
-                      ? `Stand: ${timeFormat.format(standAt)} · Quelle: marktguru`
-                      : "")
-                }
-                statusIsError={!!error}
-                onDiscover={() => goTo("discover")}
-              />
-            )}
+        {missedReleases.length > 0 && <WhatsNew releases={missedReleases} onClose={closeWhatsNew} />}
 
-            {tab === "settings" && (
-              <Settings zip={zip} onZipChange={setZip} markets={markets} onMarketsChange={setMarkets} />
-            )}
-          </div>
-        )}
-
-        {/*
-         * Entdecken wird nur versteckt, nie abgebaut: Suchbegriff, Ergebnisse und Filter bleiben beim
-         * Tab-Wechsel erhalten. Die Gleit-Animation startet beim Wiedereinblenden von selbst neu.
-         */}
-        <div
-          ref={tab === "discover" ? pageRef : undefined}
-          className={`tab-page${slide ? ` slide-${slide}` : ""}`}
-          hidden={tab !== "discover"}
-        >
-          <Search
-            zip={zip}
-            markets={markets}
-            brands={brands}
-            isFavorite={isFavorite}
-            onToggleFavorite={toggleFavorite}
-            onResults={rememberBrands}
-          />
-        </div>
-      </main>
-
-      {toast && (
-        <div key={toast.id} className="toast" role="status">
-          {toast.text}
-        </div>
-      )}
-
-      {missedReleases.length > 0 && <WhatsNew releases={missedReleases} onClose={closeWhatsNew} />}
-
-      <TabBar tabs={TABS} active={tab} onChange={goTo} />
-    </div>
+        <TabBar tabs={TABS} active={tab} onChange={goTo} />
+      </div>
+    </FavoritesContext.Provider>
   );
 }

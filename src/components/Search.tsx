@@ -6,9 +6,11 @@ import { complete, correct } from "../lib/fuzzy";
 import { mergeById, sortOffers } from "../lib/offers";
 import { CategoryGrid } from "./CategoryGrid";
 import { SearchResults } from "./SearchResults";
+import { ZipPrompt } from "./ZipPrompt";
 
 interface Props {
   zip: string;
+  onZipChange: (zip: string) => void;
   markets: Market[];
   /** eingebaute + gelernte Marken */
   brands: string[];
@@ -38,7 +40,7 @@ const POPULAR = ["Monster Energy", "Red Bull", "Barebells", "Coca-Cola", "Pringl
 const CACHE_MS = 30 * 60 * 1000;
 
 /** Entdecken: Suche mit Vorschlägen beim Tippen, "Meintest du …?", beliebte Marken und Kategorie-Kacheln */
-export function Search({ zip, markets, brands, isFavorite, onToggleFavorite, onResults }: Props) {
+export function Search({ zip, onZipChange, markets, brands, isFavorite, onToggleFavorite, onResults }: Props) {
   const [query, setQuery] = useState("");
   const [focused, setFocused] = useState(false);
   const [view, setView] = useState<View | null>(null);
@@ -46,13 +48,7 @@ export function Search({ zip, markets, brands, isFavorite, onToggleFavorite, onR
   const [error, setError] = useState("");
   const cache = useRef(new Map<string, { at: number; offers: Offer[] }>());
 
-  if (!/^\d{5}$/.test(zip)) {
-    return (
-      <p className="notice">
-        Trag unter <b>Einstellungen</b> deine Postleitzahl ein, dann kannst du hier suchen.
-      </p>
-    );
-  }
+  if (!/^\d{5}$/.test(zip)) return <ZipPrompt onZipChange={onZipChange} />;
 
   async function load(queries: string[]): Promise<Offer[]> {
     const key = `${zip}|${queries.join("|").toLowerCase()}`;
