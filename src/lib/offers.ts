@@ -107,7 +107,7 @@ function brandKey(offer: Offer): string {
 }
 
 /**
- * Teilt die (schon sortierten) Angebote eines Merklisten-Eintrags nach Marke auf.
+ * Teilt die (schon sortierten) Angebote eines Favoriten nach Marke auf.
  * Ohne Marke zählt der Produktname. Die Marke mit dem besten Angebot steht oben.
  */
 export function groupByBrand(offers: Offer[], today = todayISO()): BrandGroup[] {
@@ -182,12 +182,12 @@ export function mergeById(offers: Offer[]): Offer[] {
   return [...byId.values()];
 }
 
-/** Gültige Angebote pro Merklisten-Eintrag, in Merklisten-Reihenfolge; bei brandOnly nur diese Marke */
+/** Gültige Angebote pro Favorit, in der Reihenfolge der Favoriten */
 export function groupByTerm(offers: Offer[], watchlist: WatchItem[], today = todayISO()): OfferGroup[] {
-  return watchlist.map(({ term, brandOnly }) => ({
+  return watchlist.map(({ term }) => ({
     term,
     offers: sortOffers(
-      offers.filter((o) => o.term.toLowerCase() === term.toLowerCase() && (!brandOnly || matchesBrand(o, term))),
+      offers.filter((o) => o.term.toLowerCase() === term.toLowerCase()),
       today,
     ),
   }));

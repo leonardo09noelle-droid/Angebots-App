@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BUILTIN_BRANDS, isKnownBrand } from "./brands";
+import { BUILTIN_BRANDS } from "./brands";
 import { complete, correct, distance, normalize } from "./fuzzy";
 
 describe("normalize", () => {
@@ -41,14 +41,5 @@ describe("complete", () => {
     expect(complete("Prin", BUILTIN_BRANDS)).toEqual(["Pringles", "Prinzen Rolle"]);
     expect(complete("bull", BUILTIN_BRANDS)).toContain("Red Bull");
     expect(complete("p", BUILTIN_BRANDS)).toEqual([]);
-  });
-});
-
-describe("isKnownBrand", () => {
-  it("erkennt Marken und ihren Anfang, aber keine Gattungen", () => {
-    expect(isKnownBrand("Pringles")).toBe(true);
-    expect(isKnownBrand("monster")).toBe(true);
-    expect(isKnownBrand("Proteinriegel")).toBe(false);
-    expect(isKnownBrand("Chips")).toBe(false);
   });
 });

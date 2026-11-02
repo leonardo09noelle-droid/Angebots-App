@@ -1,6 +1,6 @@
 import { normalize } from "./fuzzy";
 
-/** Bekannte Supermarkt-Marken für Vorschläge, "Meintest du …?" und den Marken-Schalter */
+/** Bekannte Supermarkt-Marken für Vorschläge und "Meintest du …?" */
 export const BUILTIN_BRANDS = [
   // Energy & Softdrinks
   "Monster Energy", "Red Bull", "Rockstar", "Effect", "28 Black", "Reign", "Booster",
@@ -29,19 +29,6 @@ export const BUILTIN_BRANDS = [
   // Eis & Tiefkühl
   "Ben & Jerry's", "Langnese", "Magnum", "Dr. Oetker", "Wagner", "Iglo", "McCain",
 ];
-
-/**
- * Ist der Begriff eine Marke? Auch der Anfang einer Marke zählt ("Monster" -> Monster Energy).
- * Dann schaltet die App "Nur diese Marke" automatisch an.
- */
-export function isKnownBrand(term: string, brands: string[] = BUILTIN_BRANDS): boolean {
-  const t = normalize(term);
-  if (t.length < 3) return false;
-  return brands.some((b) => {
-    const n = normalize(b);
-    return n === t || (t.length >= 4 && n.startsWith(t));
-  });
-}
 
 /** Eingebaute und gelernte Marken ohne Dubletten */
 export function allBrands(learned: string[]): string[] {

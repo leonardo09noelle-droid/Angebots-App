@@ -26,26 +26,31 @@ describe("loadMarkets", () => {
   });
 });
 
-describe("Merkliste", () => {
-  it("wandelt das alte Format (nur Texte) um und schaltet bei Marken 'Nur Marke' an", () => {
+describe("Favoriten", () => {
+  it("wandelt das ganz alte Format (nur Texte) um", () => {
     store.set("angebote.watchlist", JSON.stringify(["Monster Energy", "Proteinriegel"]));
-    expect(loadWatchlist()).toEqual([
-      { term: "Monster Energy", brandOnly: true },
-      { term: "Proteinriegel", brandOnly: false },
+    expect(loadWatchlist()).toEqual([{ term: "Monster Energy" }, { term: "Proteinriegel" }]);
+  });
+
+  it("übernimmt Einträge aus 2.x und lässt den alten Marken-Schalter weg", () => {
+    store.set(
+      "angebote.watchlist",
+      JSON.stringify([
+        { term: "Pringles", brandOnly: true },
+        { term: "Chips", brandOnly: false },
+      ]),
+    );
+    expect(loadWatchlist()).toEqual([{ term: "Pringles" }, { term: "Chips" }]);
+  });
+
+  it("liest Kategorie-Favoriten und ignoriert Kaputtes", () => {
+    expect(parseWatchlist([{ term: "Müsli", categoryId: "muesli" }, 42, "", { foo: 1 }, { term: " " }])).toEqual([
+      { term: "Müsli", categoryId: "muesli" },
     ]);
   });
 
-  it("liest das neue Format unverändert und ignoriert Kaputtes", () => {
-    expect(parseWatchlist([{ term: "Pringles", brandOnly: false }, 42, "", { foo: 1 }])).toEqual([
-      { term: "Pringles", brandOnly: false },
-    ]);
-  });
-
-  it("startet mit Monster Energy (Marke) und Proteinriegel", () => {
-    expect(loadWatchlist()).toEqual([
-      { term: "Monster Energy", brandOnly: true },
-      { term: "Proteinriegel", brandOnly: false },
-    ]);
+  it("startet mit Monster Energy und Proteinriegel", () => {
+    expect(loadWatchlist()).toEqual([{ term: "Monster Energy" }, { term: "Proteinriegel" }]);
   });
 });
 

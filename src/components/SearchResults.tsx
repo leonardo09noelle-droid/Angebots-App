@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { Offer } from "../types";
+import type { Offer, WatchItem } from "../types";
 import { matchesBrand } from "../lib/offers";
 import { OfferList } from "./OfferList";
 
@@ -9,15 +9,14 @@ interface Props {
   title: string;
   /** schon sortiert und auf die Märkte gefiltert */
   offers: Offer[];
-  /** Merkliste: was schon drauf ist */
-  isOnWatchlist: (term: string) => boolean;
-  /** Ohne gewählte Marke: dieser Begriff kommt auf die Merkliste (bei Kategorien keiner) */
-  fallbackTerm?: { term: string; brandOnly: boolean };
-  onAddItem: (term: string, brandOnly: boolean) => void;
+  /** Was ☆ Merken speichert, solange keine Marke gewählt ist (Suchbegriff oder Kategorie) */
+  favorite: WatchItem;
+  isFavorite: (item: WatchItem) => boolean;
+  onToggleFavorite: (item: WatchItem) => void;
 }
 
 /** Ergebnisse mit Marken-Chips zum Filtern ("Alle · Pringles (3) · funny-frisch (2)") */
-export function SearchResults({ title, offers, isOnWatchlist, fallbackTerm, onAddItem }: Props) {
+export function SearchResults({ title, offers, favorite, isFavorite, onToggleFavorite }: Props) {
   const [brand, setBrand] = useState<string | null>(null);
 
   const brandCounts = useMemo(() => {
@@ -33,22 +32,23 @@ export function SearchResults({ title, offers, isOnWatchlist, fallbackTerm, onAd
     ? offers.filter((o) => (brand === NO_BRAND ? !o.brand?.trim() : matchesBrand(o, brand)))
     : offers;
 
-  const add = brand && brand !== NO_BRAND ? { term: brand, brandOnly: true } : fallbackTerm;
+  // Mit gewählter Marke wird genau diese Marke gemerkt
+  const item = brand && brand !== NO_BRAND ? { term: brand } : favorite;
+  const saved = isFavorite(item);
 
   return (
     <section className="group">
       <h2>
         {title}
         <span className="count">{visible.length}</span>
-        {add && (
-          <button
-            className="add-watch"
-            onClick={() => onAddItem(add.term, add.brandOnly)}
-            disabled={isOnWatchlist(add.term)}
-          >
-            {isOnWatchlist(add.term) ? "Auf Merkliste ✓" : `+ ${add.term}`}
-          </button>
-        )}
+        <button
+          className={`star-btn${saved ? " on" : ""}`}
+          onClick={() => onToggleFavorite(item)}
+          aria-pressed={saved}
+          aria-label={saved ? `${item.term} von der Startseite nehmen` : `${item.term} merken`}
+        >
+          {saved ? "★ Gemerkt" : brand && brand !== NO_BRAND ? `☆ ${brand} merken` : "☆ Merken"}
+        </button>
       </h2>
 
       {brandCounts.length > 1 && (

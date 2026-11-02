@@ -27,8 +27,8 @@ const offer = (o: Partial<Offer>): Offer => ({
   ...o,
 });
 
-/** Merklisten-Eintrag ohne Marken-Filter */
-const all = (term: string) => ({ term, brandOnly: false });
+/** Favorit */
+const all = (term: string) => ({ term });
 
 describe("todayISO", () => {
   it("formatiert in lokaler Zeit mit führenden Nullen", () => {
@@ -67,7 +67,7 @@ describe("groupByTerm", () => {
     offer({ id: "d", term: "proteinriegel", product: "Riegel", price: 1.11 }),
   ];
 
-  it("sortiert nach Preis, blendet Abgelaufenes aus, behält die Merklisten-Reihenfolge", () => {
+  it("sortiert nach Preis, blendet Abgelaufenes aus, behält die Reihenfolge der Favoriten", () => {
     const groups = groupByTerm(offers, [all("Proteinriegel"), all("Monster Energy"), all("Pringles")], today);
     expect(groups.map((g) => g.term)).toEqual(["Proteinriegel", "Monster Energy", "Pringles"]);
     expect(groups[0].offers.map((o) => o.id)).toEqual(["d"]);
@@ -84,14 +84,11 @@ describe("groupByTerm", () => {
     expect(groups[0].offers.map((o) => o.id)).toEqual(["now", "next"]);
   });
 
-  it("zeigt bei 'Nur Marke' nur Angebote dieser Marke", () => {
+  it("zeigt alle Treffer zum Favoriten, ohne Marken-Filter", () => {
     const monster = [
       offer({ id: "me", term: "Monster", brand: "Monster Energy", product: "Energy Drink" }),
       offer({ id: "mampf", term: "Monster", brand: "Covo", product: "Monster Mampf Mini" }),
     ];
-    expect(groupByTerm(monster, [{ term: "Monster", brandOnly: true }], today)[0].offers.map((o) => o.id)).toEqual([
-      "me",
-    ]);
     expect(groupByTerm(monster, [all("Monster")], today)[0].offers).toHaveLength(2);
   });
 });

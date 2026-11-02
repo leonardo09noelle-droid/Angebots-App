@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Offer } from "./types";
+import type { Offer, WatchItem } from "./types";
 import { groupByTerm, markNew } from "./lib/offers";
 import { fetchOffers } from "./lib/api";
 import { allBrands } from "./lib/brands";
 import { releaseKey, unseenReleases } from "./lib/changelog";
+import { fetchedAtOf, mergeRemote, searchTermOf, termsToFetch, upgradeCache } from "./lib/remote";
 import {
   learnBrands,
   loadLearnedBrands,
@@ -22,38 +23,44 @@ import {
   saveZip,
   type RemoteCache,
 } from "./lib/storage";
-import { OfferList } from "./components/OfferList";
-import { MyProducts } from "./components/MyProducts";
+import { Home } from "./components/Home";
 import { Search } from "./components/Search";
 import { Settings } from "./components/Settings";
 import { WhatsNew } from "./components/WhatsNew";
 import { TabBar } from "./components/TabBar";
 import { useSwipeTabs } from "./lib/useSwipeTabs";
 
-type Tab = "offers" | "search" | "products" | "settings";
+type Tab = "home" | "discover" | "settings";
 
 const TABS: { id: Tab; label: string; title: string; icon: string }[] = [
-  { id: "offers", label: "Angebote", title: "Angebote", icon: "🏷️" },
-  { id: "search", label: "Suchen", title: "Suchen", icon: "🔍" },
-  { id: "products", label: "Produkte", title: "Meine Produkte", icon: "⭐" },
+  { id: "home", label: "Start", title: "Meine Angebote", icon: "🏠" },
+  { id: "discover", label: "Entdecken", title: "Entdecken", icon: "🔍" },
   { id: "settings", label: "Einstellungen", title: "Einstellungen", icon: "⚙️" },
 ];
 
 const timeFormat = new Intl.DateTimeFormat("de-DE", { weekday: "short", hour: "2-digit", minute: "2-digit" });
 
+/** Derselbe Favorit? Kategorien über ihre Kachel, sonst über den Begriff (Groß/Klein egal) */
+function sameFavorite(a: WatchItem, b: WatchItem): boolean {
+  if (a.categoryId && a.categoryId === b.categoryId) return true;
+  return a.term.toLowerCase() === b.term.toLowerCase();
+}
+
 export default function App() {
-  const [tab, setTab] = useState<Tab>("offers");
+  const [tab, setTab] = useState<Tab>("home");
   // Richtung des letzten Tab-Wechsels, damit die neue Seite von der passenden Seite hereingleitet
   const [slide, setSlide] = useState<"left" | "right" | null>(null);
   const [watchlist, setWatchlist] = useState(loadWatchlist);
   const [zip, setZip] = useState(loadZip);
   const [markets, setMarkets] = useState(loadMarkets);
-  const [remote, setRemote] = useState<RemoteCache | null>(loadRemote);
+  const [remote, setRemote] = useState<RemoteCache | null>(() => upgradeCache(loadRemote(), loadWatchlist()));
   const [newIds, setNewIds] = useState<Set<string>>(() => new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [reloadToken, setReloadToken] = useState(0);
   const [learnedBrands, setLearnedBrands] = useState(loadLearnedBrands);
+  // Kurzer Hinweis über der Tab-Leiste, z. B. nach dem Merken
+  const [toast, setToast] = useState<{ text: string; id: number } | null>(null);
   // "Was ist neu": alle verpassten Versionen zeigen, nach dem ✕ nie wieder
   const [missedReleases, setMissedReleases] = useState(() => unseenReleases(loadSeenVersions()));
   const brands = useMemo(() => allBrands(learnedBrands), [learnedBrands]);
@@ -63,21 +70,21 @@ export default function App() {
     setLearnedBrands((prev) => learnBrands(prev, offers));
   }
 
-  // Beim Tab-Wechsel oben anfangen (nur der Inhalt scrollt, nicht die Seite). Suchen bleibt geladen
+  // Beim Tab-Wechsel oben anfangen (nur der Inhalt scrollt, nicht die Seite). Entdecken bleibt geladen
   // und kommt an derselben Stelle wieder, damit man Ergebnisse vergleichen kann.
   const contentRef = useRef<HTMLElement>(null);
   const searchScroll = useRef(0);
   // Geschweifte Klammern sind wichtig: scrollTo gibt in neuerem Chrome ein Promise zurück, und
   // React würde den Rückgabewert sonst als Aufräum-Funktion aufrufen (Absturz beim Tab-Wechsel)
   useEffect(() => {
-    contentRef.current?.scrollTo({ top: tab === "search" ? searchScroll.current : 0 });
+    contentRef.current?.scrollTo({ top: tab === "discover" ? searchScroll.current : 0 });
   }, [tab]);
 
   function goTo(next: Tab) {
     const from = TABS.findIndex((t) => t.id === tab);
     const to = TABS.findIndex((t) => t.id === next);
     if (from === to) return;
-    if (tab === "search") searchScroll.current = contentRef.current?.scrollTop ?? 0;
+    if (tab === "discover") searchScroll.current = contentRef.current?.scrollTop ?? 0;
     setSlide(to > from ? "left" : "right");
     setTab(next);
   }
@@ -103,28 +110,73 @@ export default function App() {
   useEffect(() => {
     saveMarkets(markets);
   }, [markets]);
+  useEffect(() => {
+    if (remote) saveRemote(remote);
+  }, [remote]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 2200);
+    return () => clearTimeout(timer);
+  }, [toast]);
+
+  // Kommt die App aus dem Hintergrund zurück, nachsehen, ob etwas veraltet ist (geladen wird nur dann)
+  const [wakeToken, setWakeToken] = useState(0);
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === "visible") setWakeToken((n) => n + 1);
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, []);
 
   const validZip = /^\d{5}$/.test(zip);
   const termsKey = watchlist.map((w) => w.term).join(",");
 
-  // Automatische Suche: beim Start, bei neuer PLZ/Merkliste und per Aktualisieren-Knopf
+  // Der Abruf liest den Speicher über Refs, damit er nicht bei jedem neuen Ergebnis von vorne startet
+  const remoteRef = useRef(remote);
+  const watchlistRef = useRef(watchlist);
   useEffect(() => {
-    if (!validZip || !termsKey) return;
+    remoteRef.current = remote;
+    watchlistRef.current = watchlist;
+  }, [remote, watchlist]);
+  /** ↻ gedrückt: diesmal alle Favoriten laden, auch frische */
+  const forceAll = useRef(false);
+
+  // Sparsame automatische Suche: nur neue Favoriten und was älter als 3 Stunden ist
+  useEffect(() => {
+    if (!validZip) return;
+    const items = forceAll.current ? watchlistRef.current : termsToFetch(remoteRef.current, zip, watchlistRef.current);
+    forceAll.current = false;
+    if (items.length === 0) return;
+
     const controller = new AbortController();
     setLoading(true);
     setError("");
-    fetchOffers(zip, termsKey.split(","), controller.signal)
+    fetchOffers(zip, items.map(searchTermOf), controller.signal)
       .then((result) => {
-        const cache = { zip, fetchedAt: Date.now(), offers: result.offers };
-        setRemote(cache);
-        saveRemote(cache);
+        const prev = remoteRef.current;
+        const failed = new Set(result.failedTerms.map((t) => t.toLowerCase()));
+        const done = items.map((i) => i.term).filter((t) => !failed.has(t.toLowerCase()));
+        const next = mergeRemote(prev, zip, done, result.offers, watchlistRef.current);
+        remoteRef.current = next;
+        setRemote(next);
         rememberBrands(result.offers);
 
-        // "Neu" bleibt für diese Sitzung stehen, auch nach erneutem Aktualisieren
+        // "Neu" gibt es nur bei Favoriten, die schon einmal geladen waren; ein frisch gemerkter
+        // Favorit ist nicht komplett "neu". Bleibt für diese Sitzung stehen.
+        const knownBefore = new Set(
+          items
+            .filter((i) => prev?.zip === zip && fetchedAtOf(prev, i.term) !== undefined)
+            .map((i) => i.term.toLowerCase()),
+        );
         const ids = result.offers.map((o) => o.id);
         const seen = loadSeen();
-        const fresh = markNew(ids, seen);
-        setNewIds((prev) => new Set([...prev, ...fresh]));
+        const fresh = markNew(
+          result.offers.filter((o) => knownBefore.has(o.term.toLowerCase())).map((o) => o.id),
+          seen,
+        );
+        setNewIds((old) => new Set([...old, ...fresh]));
         saveSeen([...new Set([...ids, ...(seen ?? [])])]);
 
         if (result.failedTerms.length) setError(`Für ${result.failedTerms.join(", ")} hat die Suche nicht geklappt.`);
@@ -136,36 +188,56 @@ export default function App() {
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [zip, validZip, termsKey, reloadToken]);
+  }, [zip, validZip, termsKey, reloadToken, wakeToken]);
+
+  function refresh() {
+    forceAll.current = true;
+    setReloadToken((n) => n + 1);
+  }
 
   const visibleOffers = useMemo(
     () => (remote && remote.zip === zip ? remote.offers.filter((o) => markets.includes(o.market)) : []),
     [remote, zip, markets],
   );
   const groups = useMemo(() => groupByTerm(visibleOffers, watchlist), [visibleOffers, watchlist]);
-  const offerCounts = useMemo(() => new Map(groups.map((g) => [g.term, g.offers.length])), [groups]);
+
+  // "Stand": wann der älteste angezeigte Favorit geladen wurde
+  const fetchedTimes =
+    remote && remote.zip === zip
+      ? watchlist.map((w) => fetchedAtOf(remote, w.term)).filter((t): t is number => t !== undefined)
+      : [];
+  const standAt = fetchedTimes.length ? Math.min(...fetchedTimes) : undefined;
 
   function closeWhatsNew() {
     saveSeenVersions([...new Set([...loadSeenVersions(), ...missedReleases.map(releaseKey)])]);
     setMissedReleases([]);
   }
 
-  function addItem(term: string, brandOnly: boolean) {
-    setWatchlist((prev) =>
-      prev.some((w) => w.term.toLowerCase() === term.toLowerCase()) ? prev : [...prev, { term, brandOnly }],
-    );
+  /** ☆ Merken / ★ Gemerkt. offers: schon geladene Treffer aus Entdecken, dann muss nichts nachgeladen werden */
+  function toggleFavorite(item: WatchItem, offers?: Offer[]) {
+    const exists = watchlist.some((w) => sameFavorite(w, item));
+    if (!exists && offers && validZip) {
+      const relabeled = offers.map((o) => ({ ...o, term: item.term }));
+      const next = mergeRemote(remoteRef.current, zip, [item.term], relabeled, [...watchlist, item]);
+      remoteRef.current = next;
+      setRemote(next);
+    }
+    setWatchlist((prev) => (exists ? prev.filter((w) => !sameFavorite(w, item)) : [...prev, item]));
+    setToast({ text: exists ? "Von deiner Startseite entfernt" : "⭐ Auf deiner Startseite", id: Date.now() });
   }
+
+  const isFavorite = (item: WatchItem) => watchlist.some((w) => sameFavorite(w, item));
 
   return (
     <div className="app">
       <header className="app-header">
         <h1>{TABS.find((t) => t.id === tab)!.title}</h1>
-        {tab === "offers" && validZip && (
+        {tab === "home" && validZip && (
           <div className="header-actions">
             <span className="zip-chip">📍 {zip}</span>
             <button
               className={`refresh${loading ? " spinning" : ""}`}
-              onClick={() => setReloadToken((n) => n + 1)}
+              onClick={refresh}
               disabled={loading}
               aria-label="Angebote aktualisieren"
             >
@@ -177,57 +249,27 @@ export default function App() {
 
       <main className="content" ref={contentRef} {...swipe}>
         {/* key: bei jedem Tab neu, damit die Gleit-Animation jedes Mal läuft */}
-        {tab !== "search" && (
+        {tab !== "discover" && (
           <div key={tab} ref={pageRef} className={`tab-page${slide ? ` slide-${slide}` : ""}`}>
-            {tab === "offers" && (
-              <>
-                {!validZip ? (
-                  <p className="notice">
-                    Trag unter <b>Einstellungen</b> deine Postleitzahl ein, dann suche ich die Angebote automatisch.
-                  </p>
-                ) : (
-                  <p className={`status${error ? " status-error" : ""}`}>
-                    {error ||
-                      (loading
-                        ? "Suche Angebote …"
-                        : remote?.zip === zip && `Stand: ${timeFormat.format(remote.fetchedAt)} · Quelle: marktguru`)}
-                  </p>
-                )}
-
-                {markets.length === 0 && (
-                  <p className="notice">
-                    Du hast unter <b>Einstellungen</b> alle Märkte abgewählt, deshalb siehst du keine Angebote.
-                  </p>
-                )}
-
-                {watchlist.length === 0 ? (
-                  <p className="empty">
-                    Du hast noch keine Produkte. Füg unter <b>Produkte</b> welche hinzu.
-                  </p>
-                ) : (
-                  groups.map((group) => (
-                    <section key={group.term} className="group">
-                      <h2>
-                        {group.term}
-                        <span className="count">{group.offers.length}</span>
-                      </h2>
-                      {group.offers.length === 0 ? (
-                        <p className="none">{loading ? "…" : "Gerade kein Angebot bekannt."}</p>
-                      ) : (
-                        <OfferList offers={group.offers} newIds={newIds} />
-                      )}
-                    </section>
-                  ))
-                )}
-              </>
-            )}
-
-            {tab === "products" && (
-              <MyProducts
+            {tab === "home" && (
+              <Home
+                validZip={validZip}
+                noMarkets={markets.length === 0}
                 watchlist={watchlist}
                 onWatchlistChange={setWatchlist}
-                offerCounts={offerCounts}
-                brands={brands}
+                groups={groups}
+                newIds={newIds}
+                loading={loading}
+                status={
+                  error ||
+                  (loading
+                    ? "Suche Angebote …"
+                    : standAt !== undefined
+                      ? `Stand: ${timeFormat.format(standAt)} · Quelle: marktguru`
+                      : "")
+                }
+                statusIsError={!!error}
+                onDiscover={() => goTo("discover")}
               />
             )}
 
@@ -238,24 +280,30 @@ export default function App() {
         )}
 
         {/*
-         * Suchen wird nur versteckt, nie abgebaut: Suchbegriff, Ergebnisse und Filter bleiben beim
+         * Entdecken wird nur versteckt, nie abgebaut: Suchbegriff, Ergebnisse und Filter bleiben beim
          * Tab-Wechsel erhalten. Die Gleit-Animation startet beim Wiedereinblenden von selbst neu.
          */}
         <div
-          ref={tab === "search" ? pageRef : undefined}
+          ref={tab === "discover" ? pageRef : undefined}
           className={`tab-page${slide ? ` slide-${slide}` : ""}`}
-          hidden={tab !== "search"}
+          hidden={tab !== "discover"}
         >
           <Search
             zip={zip}
             markets={markets}
-            watchlist={watchlist}
             brands={brands}
-            onAddItem={addItem}
+            isFavorite={isFavorite}
+            onToggleFavorite={toggleFavorite}
             onResults={rememberBrands}
           />
         </div>
       </main>
+
+      {toast && (
+        <div key={toast.id} className="toast" role="status">
+          {toast.text}
+        </div>
+      )}
 
       {missedReleases.length > 0 && <WhatsNew releases={missedReleases} onClose={closeWhatsNew} />}
 

@@ -32,4 +32,12 @@ export const CATEGORY_SECTIONS: { title: string; categories: Category[] }[] = [
       { id: "proteinriegel", label: "Proteinriegel", emoji: "🍫", queries: ["Proteinriegel", "Eiweißriegel"] },
     ],
   },
+  {
+    title: "Frühstück",
+    categories: [{ id: "muesli", label: "Müsli", emoji: "🥣", queries: ["Müsli", "Granola"] }],
+  },
 ];
+
+export function findCategory(id: string | undefined): Category | undefined {
+  return CATEGORY_SECTIONS.flatMap((s) => s.categories).find((c) => c.id === id);
+}

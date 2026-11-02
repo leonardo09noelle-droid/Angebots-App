@@ -14,6 +14,52 @@ export interface Release {
 
 export const RELEASES: Release[] = [
   {
+    version: "3.0",
+    title: "Alles neu",
+    highlights: [
+      {
+        icon: "🚀",
+        title: "Das größte Update seit Beginn",
+        text:
+          "Wir haben die ganze App von Grund auf neu sortiert. Weniger Tabs, kein Hin- und Herspringen, " +
+          "kein Rätselraten mehr: Du findest etwas, tippst einmal, und es ist da, wo du es erwartest.",
+      },
+      {
+        icon: "🏠",
+        title: "Deine neue Startseite",
+        text:
+          "Start zeigt dir sofort alle Angebote zu deinen Favoriten, günstigste zuerst. Über „Bearbeiten“ " +
+          "benennst du Favoriten um oder wirfst sie raus, ganz wie du es vom iPhone kennst.",
+      },
+      {
+        icon: "⭐",
+        title: "Ein Stern für alles",
+        text:
+          "Ob Marke, Produkt oder ganze Kategorie wie Schokolade: Unter Entdecken tippst du auf „☆ Merken“ " +
+          "und es landet direkt auf deiner Startseite. Den komplizierten Marken-Schalter gibt es nicht mehr.",
+      },
+      {
+        icon: "🔍",
+        title: "Entdecken statt suchen",
+        text:
+          "Suche, beliebte Marken und alle Kategorien an einem Ort. Die schlaue Suche versteht weiter " +
+          "Tippfehler und merkt sich, wo du warst.",
+      },
+      {
+        icon: "🔋",
+        title: "Spart Akku und Daten",
+        text:
+          "Die App lädt nur noch, was wirklich neu ist: Frische Angebote kommen sofort aus dem Speicher, " +
+          "ein neuer Favorit lädt nur sich selbst, und dieselbe Suche wird nicht doppelt abgerufen.",
+      },
+      {
+        icon: "🥣",
+        title: "Neu: Müsli",
+        text: "Die neue Kategorie Frühstück startet mit Müsli und Granola. Perfekt für deinen nächsten Wocheneinkauf.",
+      },
+    ],
+  },
+  {
     version: "2.1",
     title: "Smartes Menü",
     highlights: [

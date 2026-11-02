@@ -1,5 +1,4 @@
 import { MARKETS, type Market, type Offer, type WatchItem } from "../types";
-import { isKnownBrand } from "./brands";
 
 // Alles liegt nur auf diesem Handy (localStorage). Lesen/Schreiben kann z. B. im
 // privaten Modus fehlschlagen, deshalb fällt alles auf die Startwerte zurück.
@@ -23,12 +22,14 @@ export interface RemoteCache {
   zip: string;
   fetchedAt: number;
   offers: Offer[];
+  /**
+   * Wann jeder Favorit zuletzt abgerufen wurde (Schlüssel: Begriff kleingeschrieben). Fehlt bei
+   * Speichern aus Versionen vor 3.0, siehe upgradeCache in remote.ts.
+   */
+  termFetchedAt?: Record<string, number>;
 }
 
-export const DEFAULT_WATCHLIST: WatchItem[] = [
-  { term: "Monster Energy", brandOnly: true },
-  { term: "Proteinriegel", brandOnly: false },
-];
+export const DEFAULT_WATCHLIST: WatchItem[] = [{ term: "Monster Energy" }, { term: "Proteinriegel" }];
 
 function read<T>(key: string, fallback: T): T {
   try {
@@ -47,12 +48,17 @@ function write(key: string, value: unknown): void {
   }
 }
 
-/** Ältere Versionen speicherten nur Texte; die werden umgewandelt (bekannte Marke -> "Nur diese Marke") */
+/**
+ * Favoriten lesen. Ältere Versionen speicherten nur Texte (bis 1.5) oder dazu "brandOnly" (bis 2.1);
+ * beides wird still übernommen, der alte Marken-Schalter fällt dabei weg.
+ */
 export function parseWatchlist(raw: unknown): WatchItem[] {
   if (!Array.isArray(raw)) return DEFAULT_WATCHLIST;
   return raw.flatMap((entry): WatchItem[] => {
-    if (typeof entry === "string") return entry.trim() ? [{ term: entry, brandOnly: isKnownBrand(entry) }] : [];
-    if (entry && typeof entry.term === "string") return [{ term: entry.term, brandOnly: !!entry.brandOnly }];
+    if (typeof entry === "string") return entry.trim() ? [{ term: entry }] : [];
+    if (entry && typeof entry.term === "string" && entry.term.trim()) {
+      return [typeof entry.categoryId === "string" ? { term: entry.term, categoryId: entry.categoryId } : { term: entry.term }];
+    }
     return [];
   });
 }

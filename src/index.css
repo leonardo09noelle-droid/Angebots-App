@@ -115,7 +115,8 @@ select:focus {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  padding: 4px max(16px, calc((100% - 640px) / 2)) calc(env(safe-area-inset-bottom) + 72px);
+  /* unten Platz für die schwebende Tab-Leiste, damit das Letzte nicht dahinter verschwindet */
+  padding: 4px max(16px, calc((100% - 640px) / 2)) calc(env(safe-area-inset-bottom) + 96px);
 }
 
 .content::-webkit-scrollbar {
@@ -768,28 +769,72 @@ select:focus {
   background: color-mix(in srgb, var(--accent) 14%, transparent);
 }
 
-.watch-actions {
+/* Startseite: "Deine Favoriten · Bearbeiten" */
+.fav-bar {
   display: flex;
   align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
+  justify-content: space-between;
+  margin: 4px 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-.toggle-pill {
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--muted);
-  border-radius: 999px;
-  padding: 5px 10px;
-  font-size: 12px;
-  font-weight: 700;
-  white-space: nowrap;
+.link-btn.plain {
+  text-decoration: none;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 16px;
+}
+
+.empty .primary.big {
+  width: 100%;
+  margin-top: 18px;
+}
+
+.secondary.big {
+  width: 100%;
+  margin: 8px 0 16px;
   cursor: pointer;
 }
 
-.toggle-pill.on {
-  border-color: var(--accent);
-  color: var(--accent);
+.discover-hint {
+  margin: 14px 0 0;
+  font-size: 14px;
+}
+
+/* Kurzer Hinweis über der Tab-Leiste ("⭐ Auf deiner Startseite") */
+.toast {
+  position: absolute;
+  left: 50%;
+  bottom: calc(max(8px, env(safe-area-inset-bottom) - 26px) + 86px);
+  z-index: 11;
+  translate: -50% 0;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
+  pointer-events: none;
+  animation: toast-in 0.25s ease-out;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    translate: -50% 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
 }
 
 /* Suche */
@@ -934,21 +979,30 @@ select:focus {
   accent-color: var(--accent);
 }
 
-.add-watch {
+/* ☆ Merken / ★ Gemerkt in Entdecken */
+.star-btn {
   margin-left: auto;
+  flex-shrink: 0;
   border: 1px solid var(--accent);
   background: none;
   color: var(--accent);
   border-radius: 999px;
-  padding: 4px 10px;
-  font-size: 13px;
+  padding: 7px 12px;
+  font-size: 14px;
   font-weight: 700;
+  white-space: nowrap;
   cursor: pointer;
 }
 
-.add-watch:disabled {
-  border-color: var(--border);
-  color: var(--muted);
+.star-btn.on {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.cat-star {
+  margin-left: auto;
+  color: var(--accent);
+  font-size: 16px;
 }
 
 .search .add-term {
@@ -1154,7 +1208,7 @@ select:focus {
   max-width: 480px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   padding: 6px; /* muss zu PADDING in TabBar.tsx passen */
   background: var(--glass-bg);
   backdrop-filter: blur(22px) saturate(1.9);

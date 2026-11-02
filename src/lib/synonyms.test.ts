@@ -27,12 +27,19 @@ describe("planQueries", () => {
     expect(queries).toEqual(["Gummibärchen", "Fruchtgummi"]);
     expect(originOf.get("fruchtgummi")).toEqual(["Gummibärchen", "Fruchtgummi"]);
   });
+
+  it("nimmt bei Kategorie-Favoriten deren feste Suchbegriffe", () => {
+    const { queries, originOf } = planQueries([{ term: "Schoki", queries: ["Schokolade"] }, "Müsli"]);
+    expect(queries).toEqual(["Schokolade", "Müsli", "Granola"]);
+    expect(originOf.get("schokolade")).toEqual(["Schoki"]);
+    expect(originOf.get("granola")).toEqual(["Müsli"]);
+  });
 });
 
 describe("fetchOffers mit Synonymen", () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  it("ordnet Fruchtgummi-Treffer dem Merklisten-Begriff Gummibärchen zu", async () => {
+  it("ordnet Fruchtgummi-Treffer dem Favoriten Gummibärchen zu", async () => {
     const offer = { id: "h1", term: "Fruchtgummi", product: "Goldbären", brand: "Haribo", price: 0.99, market: "Lidl" };
     const fetchMock = vi.fn(async () => new Response(JSON.stringify({ offers: [offer, offer], failedTerms: [] })));
     vi.stubGlobal("fetch", fetchMock);

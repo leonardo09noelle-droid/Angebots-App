@@ -10,15 +10,18 @@ export const MARKETS = [
 
 export type Market = (typeof MARKETS)[number];
 
-/** Eintrag auf der Merkliste. brandOnly: nur Angebote genau dieser Marke ("Pringles", nicht alle Chips) */
+/**
+ * Favorit auf der Startseite: eine Marke, ein Produkt ("Pringles", "Proteinriegel") oder eine ganze
+ * Kategorie. Bei Kategorien kommen die Suchbegriffe aus categories.ts (categoryId).
+ */
 export interface WatchItem {
   term: string;
-  brandOnly: boolean;
+  categoryId?: string;
 }
 
 export interface Offer {
   id: string;
-  /** Merklisten-Eintrag, zu dem das Angebot gehört (z. B. "Monster Energy") */
+  /** Favorit, zu dem das Angebot gehört (z. B. "Monster Energy") */
   term: string;
   /** Produktname ohne Marke, z. B. "Energy Drink" (vollständig: fullName()) */
   product: string;

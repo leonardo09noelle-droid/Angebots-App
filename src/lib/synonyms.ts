@@ -20,6 +20,7 @@ const GROUPS: { keys: string[]; queries: string[] }[] = [
   { keys: ["Whisky", "Whiskey"], queries: ["Whisky", "Whiskey"] },
   { keys: ["Wodka", "Vodka"], queries: ["Wodka"] },
   { keys: ["Nüsse", "Erdnüsse", "Nuts"], queries: ["Nüsse", "Erdnüsse"] },
+  { keys: ["Müsli", "Muesli", "Granola", "Knuspermüsli"], queries: ["Müsli", "Granola"] },
 ];
 
 const KEYED = GROUPS.flatMap((g) => g.keys.map((k) => ({ key: normalize(k), queries: g.queries })));
@@ -55,15 +56,20 @@ export function expandQuery(term: string): string[] {
     .slice(0, MAX_QUERIES_PER_TERM);
 }
 
+/** Ein Begriff, optional mit festen Suchen statt Synonymen (Kategorie-Favorit "Schokolade") */
+export type SearchTerm = string | { term: string; queries?: string[] };
+
 /**
  * Alle Suchbegriffe samt Synonymen, plus Rückweg: zu welchem ursprünglichen Begriff gehört
- * ein Treffer für "Fruchtgummi"? (damit er bei "Gummibärchen" auf der Merkliste landet)
+ * ein Treffer für "Fruchtgummi"? (damit er bei "Gummibärchen" in den Favoriten landet)
  */
-export function planQueries(terms: string[]): { queries: string[]; originOf: Map<string, string[]> } {
+export function planQueries(terms: SearchTerm[]): { queries: string[]; originOf: Map<string, string[]> } {
   const originOf = new Map<string, string[]>();
   const queries: string[] = [];
-  for (const term of terms) {
-    for (const q of expandQuery(term)) {
+  for (const entry of terms) {
+    const term = typeof entry === "string" ? entry : entry.term;
+    const own = typeof entry === "string" ? undefined : entry.queries;
+    for (const q of own?.length ? own.slice(0, MAX_QUERIES_PER_TERM) : expandQuery(term)) {
       const key = queryKey(q);
       if (!originOf.has(key)) {
         originOf.set(key, []);

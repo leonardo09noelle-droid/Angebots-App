@@ -5,7 +5,7 @@ import { OfferCard } from "./OfferCard";
 import { OfferDetail } from "./OfferDetail";
 
 interface Props {
-  /** Angebote eines Merklisten-Eintrags, schon sortiert (siehe groupByTerm) */
+  /** Angebote eines Favoriten, schon sortiert (siehe groupByTerm) */
   offers: Offer[];
   newIds?: Set<string>;
 }

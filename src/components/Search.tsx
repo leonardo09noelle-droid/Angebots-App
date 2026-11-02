@@ -1,8 +1,7 @@
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import type { Market, Offer, WatchItem } from "../types";
 import { fetchOffers } from "../lib/api";
-import { isKnownBrand } from "../lib/brands";
-import type { Category } from "../lib/categories";
+import { CATEGORY_SECTIONS, type Category } from "../lib/categories";
 import { complete, correct } from "../lib/fuzzy";
 import { mergeById, sortOffers } from "../lib/offers";
 import { CategoryGrid } from "./CategoryGrid";
@@ -11,10 +10,11 @@ import { SearchResults } from "./SearchResults";
 interface Props {
   zip: string;
   markets: Market[];
-  watchlist: WatchItem[];
   /** eingebaute + gelernte Marken */
   brands: string[];
-  onAddItem: (term: string, brandOnly: boolean) => void;
+  isFavorite: (item: WatchItem) => boolean;
+  /** offers: alle geladenen Treffer, falls genau diese Suche gemerkt wird (spart einen Abruf) */
+  onToggleFavorite: (item: WatchItem, offers?: Offer[]) => void;
   /** Ergebnisse melden, damit die App neue Marken lernt */
   onResults: (offers: Offer[]) => void;
 }
@@ -24,16 +24,27 @@ interface View {
   title: string;
   /** bei automatischer Korrektur: was ursprünglich eingegeben wurde */
   original?: string;
+  category?: Category;
+  /** Treffer in deinen Märkten, sortiert */
   offers: Offer[];
+  /** alle Treffer, auch aus anderen Märkten (so speichert sie auch die Startseite) */
+  all: Offer[];
 }
 
-/** Suche mit Vorschlägen beim Tippen, "Meintest du …?" und Kategorie-Kacheln. Ergebnisse werden nicht gespeichert. */
-export function Search({ zip, markets, watchlist, brands, onAddItem, onResults }: Props) {
+/** Beliebte Marken: ein Tipp sucht sofort */
+const POPULAR = ["Monster Energy", "Red Bull", "Barebells", "Coca-Cola", "Pringles", "Haribo", "Nutella", "Jack Daniel's"];
+
+/** Dieselbe Suche innerhalb von 30 Minuten nicht nochmal laden (nur im Arbeitsspeicher) */
+const CACHE_MS = 30 * 60 * 1000;
+
+/** Entdecken: Suche mit Vorschlägen beim Tippen, "Meintest du …?", beliebte Marken und Kategorie-Kacheln */
+export function Search({ zip, markets, brands, isFavorite, onToggleFavorite, onResults }: Props) {
   const [query, setQuery] = useState("");
   const [focused, setFocused] = useState(false);
   const [view, setView] = useState<View | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const cache = useRef(new Map<string, { at: number; offers: Offer[] }>());
 
   if (!/^\d{5}$/.test(zip)) {
     return (
@@ -43,15 +54,24 @@ export function Search({ zip, markets, watchlist, brands, onAddItem, onResults }
     );
   }
 
-  async function run(kind: View["kind"], title: string, queries: string[], original?: string) {
+  async function load(queries: string[]): Promise<Offer[]> {
+    const key = `${zip}|${queries.join("|").toLowerCase()}`;
+    const hit = cache.current.get(key);
+    if (hit && Date.now() - hit.at < CACHE_MS) return hit.offers;
+    const { offers } = await fetchOffers(zip, queries);
+    onResults(offers);
+    cache.current.set(key, { at: Date.now(), offers });
+    return offers;
+  }
+
+  async function run(kind: View["kind"], title: string, queries: string[], original?: string, category?: Category) {
     setLoading(true);
     setError("");
     setFocused(false);
     try {
-      const { offers } = await fetchOffers(zip, queries);
-      onResults(offers);
-      const inMarkets = mergeById(offers).filter((o) => markets.includes(o.market));
-      setView({ kind, title, original, offers: sortOffers(inMarkets) });
+      const all = mergeById(await load(queries));
+      const inMarkets = all.filter((o) => markets.includes(o.market));
+      setView({ kind, title, original, category, offers: sortOffers(inMarkets), all });
     } catch (err) {
       setError((err as Error).message || "Die Suche hat nicht geklappt.");
     } finally {
@@ -81,11 +101,20 @@ export function Search({ zip, markets, watchlist, brands, onAddItem, onResults }
   }
 
   function openCategory(category: Category) {
-    run("category", `${category.emoji} ${category.label}`, category.queries);
+    run("category", `${category.emoji} ${category.label}`, category.queries, undefined, category);
   }
 
-  const onWatchlist = (term: string) => watchlist.some((w) => w.term.toLowerCase() === term.toLowerCase());
   const suggestions = focused ? complete(query, brands) : [];
+  const favorite: WatchItem | undefined = view
+    ? view.category
+      ? { term: view.category.label, categoryId: view.category.id }
+      : { term: view.title }
+    : undefined;
+  const favoriteCategories = new Set(
+    CATEGORY_SECTIONS.flatMap((s) => s.categories)
+      .filter((c) => isFavorite({ term: c.label, categoryId: c.id }))
+      .map((c) => c.id),
+  );
 
   return (
     <div className="search">
@@ -130,7 +159,7 @@ export function Search({ zip, markets, watchlist, brands, onAddItem, onResults }
                 setQuery("");
               }}
             >
-              ‹ Kategorien
+              ‹ Zurück
             </button>
             {view.original && (
               <p className="correction">
@@ -151,16 +180,33 @@ export function Search({ zip, markets, watchlist, brands, onAddItem, onResults }
             key={`${view.kind}:${view.title}:${view.original ?? ""}`}
             title={view.title}
             offers={view.offers}
-            isOnWatchlist={onWatchlist}
-            fallbackTerm={
-              view.kind === "search" ? { term: view.title, brandOnly: isKnownBrand(view.title, brands) } : undefined
-            }
-            onAddItem={onAddItem}
+            favorite={favorite!}
+            isFavorite={isFavorite}
+            // Wird genau diese Suche gemerkt (keine einzelne Marke), sind ihre Angebote schon da
+            onToggleFavorite={(item) => onToggleFavorite(item, item === favorite ? view.all : undefined)}
           />
         </>
       )}
 
-      {!view && !loading && <CategoryGrid onSelect={openCategory} />}
+      {!view && !loading && (
+        <>
+          <p className="hint discover-hint">
+            Tipp bei einem Ergebnis auf <b>☆ Merken</b>, dann landet es auf deiner <b>Startseite</b>.
+          </p>
+          <section>
+            <h2 className="cat-title">Beliebt</h2>
+            <div className="chips">
+              {POPULAR.map((s) => (
+                <button key={s} className="chip" onClick={() => pick(s)}>
+                  {isFavorite({ term: s }) ? "★ " : ""}
+                  {s}
+                </button>
+              ))}
+            </div>
+          </section>
+          <CategoryGrid onSelect={openCategory} favoriteIds={favoriteCategories} />
+        </>
+      )}
       {loading && <p className="status">Suche Angebote …</p>}
     </div>
   );

@@ -1,7 +1,13 @@
 import { CATEGORY_SECTIONS, type Category } from "../lib/categories";
 
-/** Kategorie-Kacheln im Suchtab */
-export function CategoryGrid({ onSelect }: { onSelect: (category: Category) => void }) {
+interface Props {
+  onSelect: (category: Category) => void;
+  /** Kategorien, die schon Favorit sind, bekommen ein ★ */
+  favoriteIds: Set<string>;
+}
+
+/** Kategorie-Kacheln in Entdecken */
+export function CategoryGrid({ onSelect, favoriteIds }: Props) {
   return (
     <div className="categories">
       {CATEGORY_SECTIONS.map((section) => (
@@ -14,6 +20,11 @@ export function CategoryGrid({ onSelect }: { onSelect: (category: Category) => v
                   {c.emoji}
                 </span>
                 {c.label}
+                {favoriteIds.has(c.id) && (
+                  <span className="cat-star" aria-label="Favorit">
+                    ★
+                  </span>
+                )}
               </button>
             ))}
           </div>

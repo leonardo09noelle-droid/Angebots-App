@@ -1,5 +1,5 @@
 import type { Offer } from "../types";
-import { planQueries, queryKey } from "./synonyms";
+import { planQueries, queryKey, type SearchTerm } from "./synonyms";
 
 export interface RemoteResult {
   offers: Offer[];
@@ -10,7 +10,7 @@ export interface RemoteResult {
  * Holt die Angebote über unsere /api/offers-Funktion. Sucht Synonyme mit ("Gummibärchen" auch als
  * "Fruchtgummi") und ordnet die Treffer wieder dem ursprünglichen Begriff zu.
  */
-export async function fetchOffers(zip: string, terms: string[], signal?: AbortSignal): Promise<RemoteResult> {
+export async function fetchOffers(zip: string, terms: SearchTerm[], signal?: AbortSignal): Promise<RemoteResult> {
   const { queries, originOf } = planQueries(terms);
   const params = new URLSearchParams({ zip, q: queries.join(",") });
   const res = await fetch(`/api/offers?${params}`, { signal });
