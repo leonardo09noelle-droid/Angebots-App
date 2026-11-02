@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import type { Offer } from "../types";
 import {
   discountPercent,
@@ -35,7 +36,10 @@ function validityText(offer: Offer): string | undefined {
   return undefined;
 }
 
-/** Detailansicht als Blatt von unten (wie bei iOS) */
+/**
+ * Detailansicht als Blatt von unten (wie bei iOS). Hängt direkt an <body> statt im scrollenden
+ * Inhalt: Auf dem iPhone verrutschen feste Elemente sonst mit der Seite.
+ */
 export function OfferDetail({ offer, cheapest, onClose }: Props) {
   const images = imageCandidates(offer.imageUrl);
   const [imageIndex, setImageIndex] = useState(0);
@@ -59,143 +63,141 @@ export function OfferDetail({ offer, cheapest, onClose }: Props) {
     };
   }, [onClose]);
 
-  return (
+  return createPortal(
     <div className="sheet-backdrop" onClick={onClose}>
-      <div
-        className="sheet"
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="sheet" role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.stopPropagation()}>
+        {/* Außerhalb des scrollenden Teils, damit der Knopf immer oben rechts stehen bleibt */}
         <button className="sheet-close" onClick={onClose} aria-label="Schließen">
           ✕
         </button>
 
-        {imageIndex < images.length && (
-          <img
-            className="detail-img"
-            src={images[imageIndex]}
-            alt={title}
-            onError={() => setImageIndex((i) => i + 1)}
-          />
-        )}
-
-        <h2 className="detail-product">{title}</h2>
-        {subtitle && subtitle !== title && !title.includes(subtitle) && <p className="detail-brand">{subtitle}</p>}
-
-        <div className="detail-price-row">
-          <span className="detail-price">{formatPrice(offer.price)}</span>
-          {discount !== undefined && offer.oldPrice !== undefined && (
-            <>
-              <span className="old-price">{formatPrice(offer.oldPrice)}</span>
-              <span className="discount">−{discount} %</span>
-            </>
+        <div className="sheet-body">
+          {imageIndex < images.length && (
+            <img
+              className="detail-img"
+              src={images[imageIndex]}
+              alt={title}
+              onError={() => setImageIndex((i) => i + 1)}
+            />
           )}
-        </div>
-        {(offer.deposit !== undefined || offer.referencePrice !== undefined) && (
-          <p className="detail-sub">
-            {[
-              offer.deposit !== undefined && `+ ${formatPrice(offer.deposit)} Pfand`,
-              offer.referencePrice !== undefined &&
-                offer.referenceUnit &&
-                `${formatPrice(offer.referencePrice)}/${offer.referenceUnit}`,
-            ]
-              .filter(Boolean)
-              .join(" · ")}
-          </p>
-        )}
 
-        <dl className="detail-facts">
-          <div>
-            <dt>Markt</dt>
-            <dd>
-              {offer.market}
-              {cheapest && <span className="best">Günstigster</span>}
-            </dd>
-          </div>
-          {offer.amount && (
-            <div>
-              <dt>Menge</dt>
-              <dd>{offer.amount}</dd>
-            </div>
-          )}
-          <div>
-            <dt>Normalpreis</dt>
-            {offer.oldPrice !== undefined && discount !== undefined ? (
-              <dd>
-                {formatPrice(offer.oldPrice)} · du sparst {formatPrice(offer.oldPrice - offer.price)} (−{discount} %)
-              </dd>
-            ) : (
-              <dd className="text-muted">nicht im Prospekt angegeben</dd>
+          <h2 className="detail-product">{title}</h2>
+          {subtitle && subtitle !== title && !title.includes(subtitle) && <p className="detail-brand">{subtitle}</p>}
+
+          <div className="detail-price-row">
+            <span className="detail-price">{formatPrice(offer.price)}</span>
+            {discount !== undefined && offer.oldPrice !== undefined && (
+              <>
+                <span className="old-price">{formatPrice(offer.oldPrice)}</span>
+                <span className="discount">−{discount} %</span>
+              </>
             )}
           </div>
-          {validity && (
+          {(offer.deposit !== undefined || offer.referencePrice !== undefined) && (
+            <p className="detail-sub">
+              {[
+                offer.deposit !== undefined && `+ ${formatPrice(offer.deposit)} Pfand`,
+                offer.referencePrice !== undefined &&
+                  offer.referenceUnit &&
+                  `${formatPrice(offer.referencePrice)}/${offer.referenceUnit}`,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+          )}
+
+          <dl className="detail-facts">
             <div>
-              <dt>Gültig</dt>
-              <dd className={isLastDay(offer) ? "text-danger" : isUpcoming(offer) ? "text-accent" : undefined}>
-                {validity}
+              <dt>Markt</dt>
+              <dd>
+                {offer.market}
+                {cheapest && <span className="best">Günstigster</span>}
               </dd>
             </div>
-          )}
-          {offer.category && (
+            {offer.amount && (
+              <div>
+                <dt>Menge</dt>
+                <dd>{offer.amount}</dd>
+              </div>
+            )}
             <div>
-              <dt>Kategorie</dt>
-              <dd>{offer.category}</dd>
+              <dt>Normalpreis</dt>
+              {offer.oldPrice !== undefined && discount !== undefined ? (
+                <dd>
+                  {formatPrice(offer.oldPrice)} · du sparst {formatPrice(offer.oldPrice - offer.price)} (−{discount} %)
+                </dd>
+              ) : (
+                <dd className="text-muted">nicht im Prospekt angegeben</dd>
+              )}
             </div>
+            {validity && (
+              <div>
+                <dt>Gültig</dt>
+                <dd className={isLastDay(offer) ? "text-danger" : isUpcoming(offer) ? "text-accent" : undefined}>
+                  {validity}
+                </dd>
+              </div>
+            )}
+            {offer.category && (
+              <div>
+                <dt>Kategorie</dt>
+                <dd>{offer.category}</dd>
+              </div>
+            )}
+          </dl>
+
+          {variety(offer) === "mixed" && (
+            <section className="detail-note">
+              <h3>Sorten</h3>
+              <p>
+                Laut Prospekt mehrere Sorten, aber nicht unbedingt alle. Welche genau, siehst du auf dem Bild oder im
+                Markt.
+              </p>
+            </section>
           )}
-        </dl>
 
-        {variety(offer) === "mixed" && (
-          <section className="detail-note">
-            <h3>Sorten</h3>
-            <p>
-              Laut Prospekt mehrere Sorten, aber nicht unbedingt alle. Welche genau, siehst du auf dem Bild oder im
-              Markt.
-            </p>
-          </section>
-        )}
-
-        {offer.loyalty && (
-          <section className="detail-note">
-            <h3>📱 {app}</h3>
-            <p>
-              {offer.loyalty === "required"
-                ? `Dieser Preis gilt nur mit ${app}.`
-                : `Normaler Preis für alle, über ${app} gibt's zusätzlich einen Bonus.`}
-            </p>
-          </section>
-        )}
-
-        {offer.source === "marktguru" && (
-          <section className="detail-note">
-            <h3>Gilt in welcher Filiale?</h3>
-            <p>
-              {isRegionalMarket(offer)
-                ? `Das Angebot stammt aus dem ${offer.market}-Prospekt für deine Postleitzahl. Viele ${offer.market}-Märkte gehören aber selbstständigen Kaufleuten und dürfen abweichen. Sicher ist es nur im Prospekt bzw. in der App deines Markts.`
-                : `Das Angebot stammt aus dem ${offer.market}-Prospekt für deine Postleitzahl und gilt normalerweise in allen Filialen der Gegend, solange der Vorrat reicht.`}
-            </p>
-          </section>
-        )}
-
-        {offer.details && (
-          <section className="detail-note">
-            <h3>Details aus dem Prospekt</h3>
-            <p>{offer.details}</p>
-          </section>
-        )}
-
-        <div className="detail-actions">
-          <button className="primary big" onClick={share}>
-            <ShareIcon size={18} /> {feedback || "Teilen"}
-          </button>
-          {offer.externalUrl && (
-            <a className="secondary big" href={offer.externalUrl} target="_blank" rel="noopener noreferrer">
-              Beim Markt ansehen ↗
-            </a>
+          {offer.loyalty && (
+            <section className="detail-note">
+              <h3>📱 {app}</h3>
+              <p>
+                {offer.loyalty === "required"
+                  ? `Dieser Preis gilt nur mit ${app}.`
+                  : `Normaler Preis für alle, über ${app} gibt's zusätzlich einen Bonus.`}
+              </p>
+            </section>
           )}
+
+          {offer.source === "marktguru" && (
+            <section className="detail-note">
+              <h3>Gilt in welcher Filiale?</h3>
+              <p>
+                {isRegionalMarket(offer)
+                  ? `Das Angebot stammt aus dem ${offer.market}-Prospekt für deine Postleitzahl. Viele ${offer.market}-Märkte gehören aber selbstständigen Kaufleuten und dürfen abweichen. Sicher ist es nur im Prospekt bzw. in der App deines Markts.`
+                  : `Das Angebot stammt aus dem ${offer.market}-Prospekt für deine Postleitzahl und gilt normalerweise in allen Filialen der Gegend, solange der Vorrat reicht.`}
+              </p>
+            </section>
+          )}
+
+          {offer.details && (
+            <section className="detail-note">
+              <h3>Details aus dem Prospekt</h3>
+              <p>{offer.details}</p>
+            </section>
+          )}
+
+          <div className="detail-actions">
+            <button className="primary big" onClick={share}>
+              <ShareIcon size={18} /> {feedback || "Teilen"}
+            </button>
+            {offer.externalUrl && (
+              <a className="secondary big" href={offer.externalUrl} target="_blank" rel="noopener noreferrer">
+                Beim Markt ansehen ↗
+              </a>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

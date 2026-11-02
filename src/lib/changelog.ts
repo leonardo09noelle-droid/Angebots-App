@@ -14,6 +14,35 @@ export interface Release {
 
 export const RELEASES: Release[] = [
   {
+    version: "2.1",
+    title: "Smartes Menü",
+    highlights: [
+      {
+        icon: "🧠",
+        title: "Die Suche merkt sich alles",
+        text:
+          "Such z. B. nach Energy, schau kurz bei Angebote vorbei und komm zurück: Deine Suche, die " +
+          "Ergebnisse, der Marken-Filter und sogar die Scroll-Position sind noch genau da, wo du warst. " +
+          "Perfekt, um Preise hin und her zu vergleichen.",
+      },
+      {
+        icon: "✕",
+        title: "Neuer Schließen-Knopf",
+        text:
+          "In der Detailansicht sitzt oben rechts jetzt ein großer, runder Knopf aus Glas. Er bleibt " +
+          "immer an seinem Platz, ist auf jedem Produktbild gut zu sehen und lässt sich bequem mit dem " +
+          "Daumen treffen.",
+      },
+      {
+        icon: "🎯",
+        title: "Detailansicht steht bombenfest",
+        text:
+          "Die Detailansicht liegt jetzt sauber über der ganzen App und verrutscht nicht mehr, egal wie " +
+          "weit du vorher gescrollt hast.",
+      },
+    ],
+  },
+  {
     version: "2.0",
     title: "Neues Design",
     highlights: [

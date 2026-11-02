@@ -63,18 +63,21 @@ export default function App() {
     setLearnedBrands((prev) => learnBrands(prev, offers));
   }
 
-  // Beim Tab-Wechsel oben anfangen (nur der Inhalt scrollt, nicht die Seite)
+  // Beim Tab-Wechsel oben anfangen (nur der Inhalt scrollt, nicht die Seite). Suchen bleibt geladen
+  // und kommt an derselben Stelle wieder, damit man Ergebnisse vergleichen kann.
   const contentRef = useRef<HTMLElement>(null);
+  const searchScroll = useRef(0);
   // Geschweifte Klammern sind wichtig: scrollTo gibt in neuerem Chrome ein Promise zurück, und
   // React würde den Rückgabewert sonst als Aufräum-Funktion aufrufen (Absturz beim Tab-Wechsel)
   useEffect(() => {
-    contentRef.current?.scrollTo({ top: 0 });
+    contentRef.current?.scrollTo({ top: tab === "search" ? searchScroll.current : 0 });
   }, [tab]);
 
   function goTo(next: Tab) {
     const from = TABS.findIndex((t) => t.id === tab);
     const to = TABS.findIndex((t) => t.id === next);
     if (from === to) return;
+    if (tab === "search") searchScroll.current = contentRef.current?.scrollTop ?? 0;
     setSlide(to > from ? "left" : "right");
     setTab(next);
   }
@@ -174,51 +177,75 @@ export default function App() {
 
       <main className="content" ref={contentRef} {...swipe}>
         {/* key: bei jedem Tab neu, damit die Gleit-Animation jedes Mal läuft */}
-        <div key={tab} ref={pageRef} className={`tab-page${slide ? ` slide-${slide}` : ""}`}>
-        {tab === "offers" && (
-          <>
-            {!validZip ? (
-              <p className="notice">
-                Trag unter <b>Einstellungen</b> deine Postleitzahl ein, dann suche ich die Angebote automatisch.
-              </p>
-            ) : (
-              <p className={`status${error ? " status-error" : ""}`}>
-                {error ||
-                  (loading
-                    ? "Suche Angebote …"
-                    : remote?.zip === zip && `Stand: ${timeFormat.format(remote.fetchedAt)} · Quelle: marktguru`)}
-              </p>
+        {tab !== "search" && (
+          <div key={tab} ref={pageRef} className={`tab-page${slide ? ` slide-${slide}` : ""}`}>
+            {tab === "offers" && (
+              <>
+                {!validZip ? (
+                  <p className="notice">
+                    Trag unter <b>Einstellungen</b> deine Postleitzahl ein, dann suche ich die Angebote automatisch.
+                  </p>
+                ) : (
+                  <p className={`status${error ? " status-error" : ""}`}>
+                    {error ||
+                      (loading
+                        ? "Suche Angebote …"
+                        : remote?.zip === zip && `Stand: ${timeFormat.format(remote.fetchedAt)} · Quelle: marktguru`)}
+                  </p>
+                )}
+
+                {markets.length === 0 && (
+                  <p className="notice">
+                    Du hast unter <b>Einstellungen</b> alle Märkte abgewählt, deshalb siehst du keine Angebote.
+                  </p>
+                )}
+
+                {watchlist.length === 0 ? (
+                  <p className="empty">
+                    Du hast noch keine Produkte. Füg unter <b>Produkte</b> welche hinzu.
+                  </p>
+                ) : (
+                  groups.map((group) => (
+                    <section key={group.term} className="group">
+                      <h2>
+                        {group.term}
+                        <span className="count">{group.offers.length}</span>
+                      </h2>
+                      {group.offers.length === 0 ? (
+                        <p className="none">{loading ? "…" : "Gerade kein Angebot bekannt."}</p>
+                      ) : (
+                        <OfferList offers={group.offers} newIds={newIds} />
+                      )}
+                    </section>
+                  ))
+                )}
+              </>
             )}
 
-            {markets.length === 0 && (
-              <p className="notice">
-                Du hast unter <b>Einstellungen</b> alle Märkte abgewählt, deshalb siehst du keine Angebote.
-              </p>
+            {tab === "products" && (
+              <MyProducts
+                watchlist={watchlist}
+                onWatchlistChange={setWatchlist}
+                offerCounts={offerCounts}
+                brands={brands}
+              />
             )}
 
-            {watchlist.length === 0 ? (
-              <p className="empty">
-                Du hast noch keine Produkte. Füg unter <b>Produkte</b> welche hinzu.
-              </p>
-            ) : (
-              groups.map((group) => (
-                <section key={group.term} className="group">
-                  <h2>
-                    {group.term}
-                    <span className="count">{group.offers.length}</span>
-                  </h2>
-                  {group.offers.length === 0 ? (
-                    <p className="none">{loading ? "…" : "Gerade kein Angebot bekannt."}</p>
-                  ) : (
-                    <OfferList offers={group.offers} newIds={newIds} />
-                  )}
-                </section>
-              ))
+            {tab === "settings" && (
+              <Settings zip={zip} onZipChange={setZip} markets={markets} onMarketsChange={setMarkets} />
             )}
-          </>
+          </div>
         )}
 
-        {tab === "search" && (
+        {/*
+         * Suchen wird nur versteckt, nie abgebaut: Suchbegriff, Ergebnisse und Filter bleiben beim
+         * Tab-Wechsel erhalten. Die Gleit-Animation startet beim Wiedereinblenden von selbst neu.
+         */}
+        <div
+          ref={tab === "search" ? pageRef : undefined}
+          className={`tab-page${slide ? ` slide-${slide}` : ""}`}
+          hidden={tab !== "search"}
+        >
           <Search
             zip={zip}
             markets={markets}
@@ -227,20 +254,6 @@ export default function App() {
             onAddItem={addItem}
             onResults={rememberBrands}
           />
-        )}
-
-        {tab === "products" && (
-          <MyProducts
-            watchlist={watchlist}
-            onWatchlistChange={setWatchlist}
-            offerCounts={offerCounts}
-            brands={brands}
-          />
-        )}
-
-        {tab === "settings" && (
-          <Settings zip={zip} onZipChange={setZip} markets={markets} onMarketsChange={setMarkets} />
-        )}
         </div>
       </main>
 

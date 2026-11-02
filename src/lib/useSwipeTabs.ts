@@ -24,7 +24,9 @@ export function useSwipeTabs(pageRef: RefObject<HTMLElement | null>, onSwipe: (d
   function onTouchStart(e: TouchEvent) {
     const touch = e.touches[0];
     const target = e.target as HTMLElement;
-    const ignore = !!target.closest("input, textarea, select, .brand-chips, .sheet, .whatsnew, [data-no-swipe]");
+    const ignore = !!target.closest(
+      "input, textarea, select, .brand-chips, .sheet-backdrop, .whatsnew, [data-no-swipe]",
+    );
     start.current = { x: touch.clientX, y: touch.clientY, ignore, axis: null };
   }
 
@@ -45,8 +47,9 @@ export function useSwipeTabs(pageRef: RefObject<HTMLElement | null>, onSwipe: (d
     if (!s || s.ignore || s.axis !== "x") return;
     const dx = e.changedTouches[0].clientX - s.x;
     const switched = Math.abs(dx) >= MIN_DISTANCE && onSwipe(dx < 0 ? 1 : -1);
-    // Bei Wechsel gleitet die neue Seite herein (CSS-Animation); sonst zurückfedern
-    if (!switched) setOffset(0, true);
+    // Bei Wechsel gleitet die neue Seite herein (CSS-Animation); sonst zurückfedern. Die alte Seite
+    // auch beim Wechsel zurücksetzen: Suchen bleibt geladen und stünde sonst beim Zurückkommen schief
+    setOffset(0, !switched);
   }
 
   return { onTouchStart, onTouchMove, onTouchEnd, onTouchCancel: () => setOffset(0, true) };
