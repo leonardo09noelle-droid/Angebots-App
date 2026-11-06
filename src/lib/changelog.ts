@@ -71,6 +71,7 @@ export const WELCOME_RELEASE: Release = {
 export const RELEASES: Release[] = [
   {
     version: "3.2",
+    revision: 2,
     date: "2026-11-06",
     title: "Stöbern",
     highlights: [
@@ -90,15 +91,18 @@ export const RELEASES: Release[] = [
       },
       {
         icon: "✨",
-        title: "Abwechslung statt Prospekt-Chaos",
+        title: "Viel mehr zum Stöbern",
         text:
-          "Pro Kategorie zeigt dir die App erst einmal 6 unterschiedliche Produkte, bekannte Marken und deine " +
-          "Lieblinge zuerst. Mehr gibt es mit einem Tipp auf „Alle zeigen“.",
+          "Unter deinen Interessen geht es jetzt einfach weiter: Chips, Käse, Pizza, Müsli, Getränke und vieles " +
+          "mehr aus dem Alltag. Scroll einfach nach unten, und neue Kategorien laden von selbst nach, immer nur " +
+          "so viel, wie du wirklich anschaust. Pro Kategorie 6 unterschiedliche Produkte, mehr mit „Alle zeigen“.",
       },
       {
         icon: "🧀",
-        title: "Neu: Milch, Käse & Joghurt",
-        text: "Drei neue Kategorien für den Wocheneinkauf, auch als Kacheln unter Entdecken.",
+        title: "Viele neue Kategorien",
+        text:
+          "Milch, Käse, Mozzarella, Joghurt, Pizza, Pommes, Eis, Kaffee, Saft, Nudeln und mehr, " +
+          "auch als Kacheln unter Entdecken.",
       },
     ],
   },

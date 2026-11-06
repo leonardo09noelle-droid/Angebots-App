@@ -13,6 +13,16 @@ export const STORE_MARKETS: Market[] = ["Rewe", "Edeka", "Lidl"];
 /** So viele Angebote zeigt ein Abschnitt, bevor man "Alle zeigen" tippen muss */
 export const SECTION_SIZE = 6;
 
+/** Beim Öffnen so viele Alltags-Kategorien laden; beim Scrollen kommen jeweils NEXT_BATCH dazu */
+export const FIRST_BATCH = 6;
+export const NEXT_BATCH = 4;
+
+/** Was fast jeder einkauft kommt zuerst */
+const EVERYDAY_ORDER = [
+  "chips", "kaese", "mozzarella", "muesli", "pizza", "cola", "schokolade", "joghurt", "kaffee", "saft",
+  "nudeln", "wasser", "eis", "kekse", "fruchtgummi", "pommes", "milch", "toast", "nuesse", "fisch", "eistee",
+];
+
 /** Deine Abweichungen von der Automatik. So wirken neue Favoriten weiter, ohne sie zu überschreiben */
 export interface InterestChanges {
   added: string[];
@@ -55,11 +65,20 @@ export function effectiveInterests(auto: string[], changes: InterestChanges): st
   return ALL_CATEGORIES.filter((c) => on.has(c.id)).map((c) => c.id);
 }
 
-/** Eine Kategorie an- oder abwählen */
+/** Eine Kategorie aus- oder wieder einblenden */
 export function toggleInterest(changes: InterestChanges, id: string, isOn: boolean): InterestChanges {
   return isOn
     ? { added: changes.added.filter((x) => x !== id), removed: [...new Set([...changes.removed, id])] }
-    : { added: [...new Set([...changes.added, id])], removed: changes.removed.filter((x) => x !== id) };
+    : { added: changes.added, removed: changes.removed.filter((x) => x !== id) };
+}
+
+/**
+ * Alles, was ein Markt-Tab zeigen kann: erst deine Interessen, dann Alltagsprodukte in dieser
+ * Reihenfolge, zuletzt der Rest. Nur was du ausgeblendet hast, fehlt.
+ */
+export function storeCategoryIds(personal: string[], changes: InterestChanges): string[] {
+  const order = [...personal, ...EVERYDAY_ORDER, ...ALL_CATEGORIES.map((c) => c.id)];
+  return [...new Set(order)].filter((id) => !changes.removed.includes(id));
 }
 
 /**

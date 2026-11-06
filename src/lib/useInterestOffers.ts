@@ -12,8 +12,15 @@ const PARALLEL = 3;
  * Angebote für die Markt-Tabs. Lädt erst, wenn ein Markt-Tab offen ist, und nur Kategorien, die neu
  * oder älter als 3 Stunden sind. Jede Kategorie ist eine eigene Anfrage: Die kann Vercel für alle
  * mit derselben Postleitzahl wiederverwenden, und ein Fehler trifft nur diese eine Kategorie.
+ * items: was gerade sichtbar ist (wächst beim Scrollen); keep: was im Speicher bleiben darf.
  */
-export function useInterestOffers(zip: string, items: WatchItem[], active: boolean, wakeToken: number) {
+export function useInterestOffers(
+  zip: string,
+  items: WatchItem[],
+  keep: WatchItem[],
+  active: boolean,
+  wakeToken: number,
+) {
   const [cache, setCache] = useState<RemoteCache | null>(loadStoreOffers);
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState<string[]>([]);
@@ -45,7 +52,7 @@ export function useInterestOffers(zip: string, items: WatchItem[], active: boole
           const offers: Offer[] = result.offers.filter((o) => STORE_MARKETS.includes(o.market));
           if (result.failedTerms.length) failedNow.push(item.term);
           const done = result.failedTerms.length ? [] : [item.term];
-          const next = mergeRemote(cacheRef.current, zip, done, done.length ? offers : [], items);
+          const next = mergeRemote(cacheRef.current, zip, done, done.length ? offers : [], keep);
           cacheRef.current = next;
           setCache(next);
           saveStoreOffers(next);

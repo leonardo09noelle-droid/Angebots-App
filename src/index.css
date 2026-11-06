@@ -864,6 +864,10 @@ select:focus {
   font-size: 14px;
 }
 
+.load-more {
+  text-align: center;
+}
+
 /* Startseite: "Deine Favoriten · Bearbeiten" */
 .fav-bar {
   display: flex;

@@ -3,13 +3,16 @@ import type { Market, Offer, WatchItem } from "./types";
 import { groupByTerm, markNew } from "./lib/offers";
 import { fetchOffers } from "./lib/api";
 import { allBrands } from "./lib/brands";
-import { ALL_CATEGORIES } from "./lib/categories";
+import { findCategory, type Category } from "./lib/categories";
 import { RELEASES, WELCOME_RELEASE, releaseKey, unseenReleases } from "./lib/changelog";
 import { FavoritesContext } from "./lib/favorites";
 import {
+  FIRST_BATCH,
+  NEXT_BATCH,
   STORE_MARKETS,
   effectiveInterests,
   sectionsForStore,
+  storeCategoryIds,
   suggestInterests,
   toggleInterest,
 } from "./lib/interests";
@@ -222,15 +225,28 @@ export default function App() {
   const view = homeView !== "mine" && storeTabs.includes(homeView) ? homeView : "mine";
   const autoInterests = useMemo(() => suggestInterests(watchlist, remote?.offers ?? []), [watchlist, remote]);
   const interestIds = useMemo(() => effectiveInterests(autoInterests, interestChanges), [autoInterests, interestChanges]);
-  const interests = useMemo(() => ALL_CATEGORIES.filter((c) => interestIds.includes(c.id)), [interestIds]);
-  const interestItems = useMemo(() => interests.map((c) => ({ term: c.label, categoryId: c.id })), [interests]);
-  const store = useInterestOffers(zip, interestItems, validZip && tab === "home" && view !== "mine", wakeToken);
+  // Erst deine Interessen, dann Alltagsprodukte; weitere Kategorien kommen erst beim Scrollen
+  const storeCategories = useMemo(
+    () =>
+      storeCategoryIds(interestIds, interestChanges).flatMap((id) => {
+        const category = findCategory(id);
+        return category ? [category] : [];
+      }),
+    [interestIds, interestChanges],
+  );
+  const [extraCategories, setExtraCategories] = useState(FIRST_BATCH);
+  const visibleCount = Math.min(storeCategories.length, interestIds.length + extraCategories);
+  const visibleCategories = useMemo(() => storeCategories.slice(0, visibleCount), [storeCategories, visibleCount]);
+  const toItem = (c: Category): WatchItem => ({ term: c.label, categoryId: c.id });
+  const storeItems = useMemo(() => visibleCategories.map(toItem), [visibleCategories]);
+  const storeKeep = useMemo(() => storeCategories.map(toItem), [storeCategories]);
+  const store = useInterestOffers(zip, storeItems, storeKeep, validZip && tab === "home" && view !== "mine", wakeToken);
   const sections = useMemo(
-    () => (view === "mine" ? [] : sectionsForStore(store.cache?.offers ?? [], view, interests, watchlist)),
-    [view, store.cache, interests, watchlist],
+    () => (view === "mine" ? [] : sectionsForStore(store.cache?.offers ?? [], view, visibleCategories, watchlist)),
+    [view, store.cache, visibleCategories, watchlist],
   );
   const storeTimes = store.cache
-    ? interestItems.map((i) => fetchedAtOf(store.cache!, i.term)).filter((t): t is number => t !== undefined)
+    ? storeItems.map((i) => fetchedAtOf(store.cache!, i.term)).filter((t): t is number => t !== undefined)
     : [];
 
   function selectView(next: "mine" | Market) {
@@ -240,6 +256,9 @@ export default function App() {
 
   function refresh() {
     if (view !== "mine") {
+      // Nur den Anfang neu laden; den Rest erst, wenn wieder dorthin gescrollt wird
+      setExtraCategories(FIRST_BATCH);
+      contentRef.current?.scrollTo({ top: 0 });
       store.refresh();
       return;
     }
@@ -329,8 +348,11 @@ export default function App() {
                   key={view}
                   market={view}
                   sections={sections}
-                  interestIds={interestIds}
+                  personalIds={interestIds}
+                  enabledIds={storeCategories.map((c) => c.id)}
                   onToggleInterest={(id, isOn) => setInterestChanges((prev) => toggleInterest(prev, id, isOn))}
+                  hasMore={visibleCount < storeCategories.length}
+                  onLoadMore={() => setExtraCategories((n) => n + NEXT_BATCH)}
                   loading={store.loading}
                   failed={store.failed}
                   fetchedLabel={

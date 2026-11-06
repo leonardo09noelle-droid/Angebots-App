@@ -40,6 +40,20 @@ export const CATEGORY_SECTIONS: { title: string; categories: Category[] }[] = [
         queries: ["Mineralwasser"],
         keywords: ["wasser", "gerolsteiner", "volvic", "vittel", "evian", "adelholzener"],
       },
+      {
+        id: "saft",
+        label: "Saft",
+        emoji: "🧃",
+        queries: ["Orangensaft", "Apfelsaft", "Fruchtsaft"],
+        keywords: ["orangensaft", "apfelsaft", "fruchtsaft", "granini", "hohes c", "valensina", "pfanner"],
+      },
+      {
+        id: "kaffee",
+        label: "Kaffee",
+        emoji: "☕",
+        queries: ["Kaffee"],
+        keywords: ["kaffee", "jacobs", "tchibo", "dallmayr", "lavazza", "nescafé", "senseo"],
+      },
     ],
   },
   {
@@ -76,6 +90,13 @@ export const CATEGORY_SECTIONS: { title: string; categories: Category[] }[] = [
         queries: ["Kekse", "Cookies"],
         keywords: ["keks", "cookie", "oreo", "bahlsen", "leibniz", "prinzen rolle"],
       },
+      {
+        id: "nuesse",
+        label: "Nüsse",
+        emoji: "🥜",
+        queries: ["Nüsse", "Erdnüsse"],
+        keywords: ["nüsse", "erdnüsse", "ültje"],
+      },
     ],
   },
   {
@@ -107,6 +128,13 @@ export const CATEGORY_SECTIONS: { title: string; categories: Category[] }[] = [
         queries: ["Müsli", "Granola"],
         keywords: ["müsli", "muesli", "granola", "kölln", "seitenbacher"],
       },
+      {
+        id: "toast",
+        label: "Toast & Brot",
+        emoji: "🥪",
+        queries: ["Toastbrot", "Sandwich"],
+        keywords: ["toastbrot", "golden toast", "harry"],
+      },
     ],
   },
   {
@@ -125,7 +153,14 @@ export const CATEGORY_SECTIONS: { title: string; categories: Category[] }[] = [
         label: "Käse",
         emoji: "🧀",
         queries: ["Käse", "Gouda"],
-        keywords: ["käse", "gouda", "mozzarella", "leerdammer", "babybel"],
+        keywords: ["käse", "gouda", "leerdammer", "babybel"],
+      },
+      {
+        id: "mozzarella",
+        label: "Mozzarella",
+        emoji: "🍅",
+        queries: ["Mozzarella"],
+        keywords: ["mozzarella", "galbani"],
       },
       {
         id: "joghurt",
@@ -133,6 +168,52 @@ export const CATEGORY_SECTIONS: { title: string; categories: Category[] }[] = [
         emoji: "🥄",
         queries: ["Joghurt"],
         keywords: ["joghurt", "skyr", "ehrmann", "danone", "müller"],
+      },
+    ],
+  },
+  {
+    title: "Tiefkühl",
+    categories: [
+      {
+        id: "pizza",
+        label: "Pizza",
+        emoji: "🍕",
+        queries: ["Pizza"],
+        keywords: ["pizza", "ristorante", "wagner"],
+      },
+      {
+        id: "pommes",
+        label: "Pommes",
+        emoji: "🍟",
+        queries: ["Pommes"],
+        keywords: ["pommes", "mccain"],
+      },
+      {
+        id: "fisch",
+        label: "Fischstäbchen",
+        emoji: "🐟",
+        queries: ["Fischstäbchen"],
+        keywords: ["fischstäbchen", "iglo"],
+      },
+      // "Eis" allein fände auch Eistee, Eisbergsalat und jeden "Preis"
+      {
+        id: "eis",
+        label: "Eis",
+        emoji: "🍦",
+        queries: ["Eiscreme", "Eis am Stiel"],
+        keywords: ["eiscreme", "magnum", "langnese", "ben & jerry"],
+      },
+    ],
+  },
+  {
+    title: "Vorrat",
+    categories: [
+      {
+        id: "nudeln",
+        label: "Nudeln",
+        emoji: "🍝",
+        queries: ["Nudeln", "Spaghetti"],
+        keywords: ["nudeln", "spaghetti", "barilla"],
       },
     ],
   },

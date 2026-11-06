@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
 import type { Offer } from "../types";
-import { findCategory } from "./categories";
-import { effectiveInterests, rankForYou, sectionsForStore, suggestInterests, toggleInterest } from "./interests";
+import { ALL_CATEGORIES, findCategory } from "./categories";
+import {
+  effectiveInterests,
+  rankForYou,
+  sectionsForStore,
+  storeCategoryIds,
+  suggestInterests,
+  toggleInterest,
+} from "./interests";
 
 const today = "2026-11-06";
 const offer = (o: Partial<Offer>): Offer => ({
@@ -46,7 +53,22 @@ describe("eigene Änderungen", () => {
   it("lassen sich an- und abwählen", () => {
     const off = toggleInterest({ added: ["kekse"], removed: [] }, "kekse", true);
     expect(off).toEqual({ added: [], removed: ["kekse"] });
-    expect(toggleInterest(off, "kekse", false)).toEqual({ added: ["kekse"], removed: [] });
+    expect(toggleInterest(off, "kekse", false)).toEqual({ added: [], removed: [] });
+  });
+});
+
+describe("storeCategoryIds", () => {
+  it("zeigt deine Interessen zuerst, dann Alltagsprodukte, jede Kategorie einmal", () => {
+    const ids = storeCategoryIds(["energy", "chips"], { added: [], removed: [] });
+    expect(ids.slice(0, 4)).toEqual(["energy", "chips", "kaese", "mozzarella"]);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(ids).toHaveLength(ALL_CATEGORIES.length);
+  });
+
+  it("zeigt auch ohne Favoriten genug und lässt Ausgeblendetes weg", () => {
+    const ids = storeCategoryIds([], { added: [], removed: ["chips"] });
+    expect(ids[0]).toBe("kaese");
+    expect(ids).not.toContain("chips");
   });
 });
 
