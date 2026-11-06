@@ -19,13 +19,13 @@ export interface Release {
  * das aktuelle Update plus die besten Funktionen aus allen Versionen davor.
  */
 export const WELCOME_RELEASE: Release = {
-  version: "3.1",
-  date: "2026-11-02",
+  version: "3.2",
+  date: "2026-11-06",
   title: "Alles neu",
   highlights: [
     {
       icon: "🚀",
-      title: "Frisch erschienen: Version 3.1",
+      title: "Frisch erschienen: Version 3.2",
       text:
         "Gerade erst hat die App ihr größtes Update seit Beginn bekommen: von Grund auf neu aufgebaut, " +
         "übersichtlicher, schneller und sparsamer. Und es geht weiter, regelmäßig kommen neue Funktionen dazu.",
@@ -53,10 +53,10 @@ export const WELCOME_RELEASE: Release = {
     },
     {
       icon: "🛒",
-      title: "Alle großen Märkte",
+      title: "Stöbern bei Rewe, Edeka & Lidl",
       text:
-        "Lidl, Aldi Nord & Süd, Penny, Netto, Rewe und Edeka in deiner Nähe. Preise, die nur mit Kunden-App " +
-        "gelten, sind markiert, und jedes Angebot kannst du mit einem Tipp an Freunde schicken.",
+        "Tipp auf einen Markt und sieh sofort, was dort gerade für dich interessant ist. Dazu vergleicht die App " +
+        "auch Aldi, Penny und Netto, und jedes Angebot kannst du mit einem Tipp an Freunde schicken.",
     },
     {
       icon: "🔋",
@@ -69,6 +69,39 @@ export const WELCOME_RELEASE: Release = {
 };
 
 export const RELEASES: Release[] = [
+  {
+    version: "3.2",
+    date: "2026-11-06",
+    title: "Stöbern",
+    highlights: [
+      {
+        icon: "🛒",
+        title: "Rewe, Edeka & Lidl direkt auf Start",
+        text:
+          "Oben auf der Startseite wartet jetzt eine neue Leiste. Ein Tipp auf einen Markt, und du siehst, was es " +
+          "dort gerade gibt. Ideal, wenn du eh gleich hingehst und schauen willst, was sich lohnt.",
+      },
+      {
+        icon: "🎯",
+        title: "Nur, was dich interessiert",
+        text:
+          "Die App erkennt an deinen Favoriten, was du magst: Wer Monster merkt, sieht Energy Drinks. Mit „Ändern“ " +
+          "stellst du deine Interessen mit einem Tipp selbst ein. Alles bleibt auf deinem Handy.",
+      },
+      {
+        icon: "✨",
+        title: "Abwechslung statt Prospekt-Chaos",
+        text:
+          "Pro Kategorie zeigt dir die App erst einmal 6 unterschiedliche Produkte, bekannte Marken und deine " +
+          "Lieblinge zuerst. Mehr gibt es mit einem Tipp auf „Alle zeigen“.",
+      },
+      {
+        icon: "🧀",
+        title: "Neu: Milch, Käse & Joghurt",
+        text: "Drei neue Kategorien für den Wocheneinkauf, auch als Kacheln unter Entdecken.",
+      },
+    ],
+  },
   {
     version: "3.1",
     date: "2026-11-02",

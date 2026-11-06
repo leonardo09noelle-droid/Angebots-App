@@ -803,6 +803,67 @@ select:focus {
   background: color-mix(in srgb, var(--accent) 14%, transparent);
 }
 
+/* Startseite: Meine · Rewe · Edeka · Lidl */
+.store-switch {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 4px;
+  margin: 2px 0 10px;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.store-switch button {
+  min-height: 40px;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.store-switch button.active {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.interest-bar {
+  gap: 12px;
+}
+
+.interest-summary {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.interest-picker {
+  margin-bottom: 18px;
+}
+
+.interest-done {
+  width: 100%;
+  margin-top: 14px;
+}
+
+.show-all {
+  width: 100%;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.store-empty {
+  margin-bottom: 18px;
+  font-size: 14px;
+}
+
 /* Startseite: "Deine Favoriten · Bearbeiten" */
 .fav-bar {
   display: flex;

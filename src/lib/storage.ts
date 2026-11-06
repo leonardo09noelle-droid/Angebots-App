@@ -1,4 +1,5 @@
 import { MARKETS, type Market, type Offer, type WatchItem } from "../types";
+import type { InterestChanges } from "./interests";
 
 // Alles liegt nur auf diesem Handy (localStorage). Lesen/Schreiben kann z. B. im
 // privaten Modus fehlschlagen, deshalb fällt alles auf die Startwerte zurück.
@@ -12,6 +13,8 @@ const KEYS = {
   brands: "angebote.brands",
   seenVersion: "angebote.seenVersion",
   seenVersions: "angebote.seenVersions",
+  interests: "angebote.interests",
+  storeOffers: "angebote.storeOffers",
 };
 
 const MAX_SEEN = 2000;
@@ -120,6 +123,17 @@ export function removeLegacyOffers(): void {
 
 export const loadRemote = () => read<RemoteCache | null>(KEYS.remote, null);
 export const saveRemote = (cache: RemoteCache) => write(KEYS.remote, cache);
+
+/** Angebote der Markt-Tabs, nach Kategorie; wie der Speicher der Favoriten, nur getrennt davon */
+export const loadStoreOffers = () => read<RemoteCache | null>(KEYS.storeOffers, null);
+export const saveStoreOffers = (cache: RemoteCache) => write(KEYS.storeOffers, cache);
+
+/** Eigene Änderungen an den automatisch erkannten Interessen */
+export const loadInterestChanges = () => {
+  const raw = read<Partial<InterestChanges>>(KEYS.interests, {});
+  return { added: raw.added ?? [], removed: raw.removed ?? [] };
+};
+export const saveInterestChanges = (changes: InterestChanges) => write(KEYS.interests, changes);
 
 /** Angehakte Lieblingsmärkte, Standard: alle */
 export const loadMarkets = (): Market[] =>

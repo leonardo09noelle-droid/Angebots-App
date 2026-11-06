@@ -1,14 +1,23 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Offer, WatchItem } from "./types";
+import type { Market, Offer, WatchItem } from "./types";
 import { groupByTerm, markNew } from "./lib/offers";
 import { fetchOffers } from "./lib/api";
 import { allBrands } from "./lib/brands";
+import { ALL_CATEGORIES } from "./lib/categories";
 import { RELEASES, WELCOME_RELEASE, releaseKey, unseenReleases } from "./lib/changelog";
 import { FavoritesContext } from "./lib/favorites";
+import {
+  STORE_MARKETS,
+  effectiveInterests,
+  sectionsForStore,
+  suggestInterests,
+  toggleInterest,
+} from "./lib/interests";
 import { fetchedAtOf, mergeRemote, searchTermOf, termsToFetch, upgradeCache } from "./lib/remote";
 import {
   isFirstStart,
   learnBrands,
+  loadInterestChanges,
   loadLearnedBrands,
   loadMarkets,
   loadSeenVersions,
@@ -17,6 +26,7 @@ import {
   loadWatchlist,
   loadZip,
   removeLegacyOffers,
+  saveInterestChanges,
   saveMarkets,
   saveRemote,
   saveSeen,
@@ -28,8 +38,10 @@ import {
 import { Home } from "./components/Home";
 import { Search } from "./components/Search";
 import { Settings } from "./components/Settings";
+import { StoreTab } from "./components/StoreTab";
 import { WhatsNew } from "./components/WhatsNew";
 import { TabBar } from "./components/TabBar";
+import { useInterestOffers } from "./lib/useInterestOffers";
 import { useSwipeTabs } from "./lib/useSwipeTabs";
 
 type Tab = "home" | "discover" | "settings";
@@ -153,7 +165,11 @@ export default function App() {
     if (!validZip) return;
     const items = forceAll.current ? watchlistRef.current : termsToFetch(remoteRef.current, zip, watchlistRef.current);
     forceAll.current = false;
-    if (items.length === 0) return;
+    // Ein laufender Abruf kann gerade abgebrochen worden sein: dann nicht ewig "lädt" anzeigen
+    if (items.length === 0) {
+      setLoading(false);
+      return;
+    }
 
     const controller = new AbortController();
     setLoading(true);
@@ -195,10 +211,43 @@ export default function App() {
     return () => controller.abort();
   }, [zip, validZip, termsKey, reloadToken, wakeToken]);
 
+  // Markt-Tabs auf Start: Interessen aus den Favoriten plus eigene Änderungen
+  const [homeView, setHomeView] = useState<"mine" | Market>("mine");
+  const [interestChanges, setInterestChanges] = useState(loadInterestChanges);
+  useEffect(() => {
+    saveInterestChanges(interestChanges);
+  }, [interestChanges]);
+  const storeTabs = STORE_MARKETS.filter((m) => markets.includes(m));
+  // Wurde der offene Markt in den Einstellungen abgewählt, zurück zu "Meine"
+  const view = homeView !== "mine" && storeTabs.includes(homeView) ? homeView : "mine";
+  const autoInterests = useMemo(() => suggestInterests(watchlist, remote?.offers ?? []), [watchlist, remote]);
+  const interestIds = useMemo(() => effectiveInterests(autoInterests, interestChanges), [autoInterests, interestChanges]);
+  const interests = useMemo(() => ALL_CATEGORIES.filter((c) => interestIds.includes(c.id)), [interestIds]);
+  const interestItems = useMemo(() => interests.map((c) => ({ term: c.label, categoryId: c.id })), [interests]);
+  const store = useInterestOffers(zip, interestItems, validZip && tab === "home" && view !== "mine", wakeToken);
+  const sections = useMemo(
+    () => (view === "mine" ? [] : sectionsForStore(store.cache?.offers ?? [], view, interests, watchlist)),
+    [view, store.cache, interests, watchlist],
+  );
+  const storeTimes = store.cache
+    ? interestItems.map((i) => fetchedAtOf(store.cache!, i.term)).filter((t): t is number => t !== undefined)
+    : [];
+
+  function selectView(next: "mine" | Market) {
+    setHomeView(next);
+    contentRef.current?.scrollTo({ top: 0 });
+  }
+
   function refresh() {
+    if (view !== "mine") {
+      store.refresh();
+      return;
+    }
     forceAll.current = true;
     setReloadToken((n) => n + 1);
   }
+
+  const viewLoading = view === "mine" ? loading : store.loading;
 
   const visibleOffers = useMemo(
     () => (remote && remote.zip === zip ? remote.offers.filter((o) => markets.includes(o.market)) : []),
@@ -244,9 +293,9 @@ export default function App() {
             <div className="header-actions">
               <span className="zip-chip">📍 {zip}</span>
               <button
-                className={`refresh${loading ? " spinning" : ""}`}
+                className={`refresh${viewLoading ? " spinning" : ""}`}
                 onClick={refresh}
-                disabled={loading}
+                disabled={viewLoading}
                 aria-label="Angebote aktualisieren"
               >
                 ↻
@@ -259,7 +308,38 @@ export default function App() {
           {/* key: bei jedem Tab neu, damit die Gleit-Animation jedes Mal läuft */}
           {tab !== "discover" && (
             <div key={tab} ref={pageRef} className={`tab-page${slide ? ` slide-${slide}` : ""}`}>
-              {tab === "home" && (
+              {tab === "home" && validZip && storeTabs.length > 0 && (
+                <div className="store-switch" role="tablist" aria-label="Ansicht" data-no-swipe>
+                  {(["mine", ...storeTabs] as const).map((v) => (
+                    <button
+                      key={v}
+                      role="tab"
+                      aria-selected={view === v}
+                      className={view === v ? "active" : ""}
+                      onClick={() => selectView(v)}
+                    >
+                      {v === "mine" ? "Meine" : v}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {tab === "home" && view !== "mine" && (
+                <StoreTab
+                  key={view}
+                  market={view}
+                  sections={sections}
+                  interestIds={interestIds}
+                  onToggleInterest={(id, isOn) => setInterestChanges((prev) => toggleInterest(prev, id, isOn))}
+                  loading={store.loading}
+                  failed={store.failed}
+                  fetchedLabel={
+                    storeTimes.length ? `Stand: ${timeFormat.format(Math.min(...storeTimes))} · Quelle: marktguru` : ""
+                  }
+                />
+              )}
+
+              {tab === "home" && view === "mine" && (
                 <Home
                   validZip={validZip}
                   onZipChange={setZip}
